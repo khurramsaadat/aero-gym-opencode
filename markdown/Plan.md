@@ -107,7 +107,7 @@
 - [x] All images via `next/image` with proper `sizes`, `priority`, `loading`
 - [x] Responsive hardening pass (375px+ mobile, 1024px+ desktop sidebar)
 
- - PRD Compliance Audit & Polish
+### M10 - PRD Compliance Audit & Polish
 - [ ] Embedded Google Maps with functional location discovery in-page (blocked: needs API-key decision from user)
 - [ ] Line-by-line PRD §3-§6 checklist against the running app; fix gaps
 - [ ] localStorage key audit; export/import round-trip test
