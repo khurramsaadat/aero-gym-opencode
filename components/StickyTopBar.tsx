@@ -26,7 +26,7 @@ export function StickyTopBar({ menuOpen, onHome, onMenuOpen }: StickyTopBarProps
           className="rounded"
           priority
         />
-        <span className="font-display text-base font-bold tracking-wide text-foreground">
+        <span className="hidden font-display text-base font-bold tracking-wide text-foreground sm:inline">
           Aero Gym
         </span>
       </button>

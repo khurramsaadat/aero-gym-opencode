@@ -24,6 +24,7 @@ import { RestTimer } from "./RestTimer";
 import { WorkoutNotes } from "./WorkoutNotes";
 import { AddWorkoutModal } from "./AddWorkoutModal";
 import { UndoToast } from "./UndoToast";
+import { ShareSessionButton } from "./ShareSessionButton";
 
 interface WorkoutsViewProps {
   onOpenWeather: () => void;
@@ -342,12 +343,15 @@ export function WorkoutsView({ onOpenWeather, requestedDate }: WorkoutsViewProps
             <h2 className="font-display text-base font-bold text-foreground">
               Today&apos;s plan
             </h2>
-            <button
-              onClick={() => setEditMode((e) => !e)}
-              className="rounded-lg px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-2 transition-colors hover:bg-card-border hover:text-foreground"
-            >
-              {editMode ? "Done" : "Edit"}
-            </button>
+            <div className="flex items-center gap-1">
+              <ShareSessionButton date={date} workouts={dayWorkouts} />
+              <button
+                onClick={() => setEditMode((e) => !e)}
+                className="rounded-lg px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider text-muted-2 transition-colors hover:bg-card-border hover:text-foreground"
+              >
+                {editMode ? "Done" : "Edit"}
+              </button>
+            </div>
           </div>
         )}
         {dayWorkouts.map((w) => (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Sidebar, TABS, type TabId } from "@/components/Sidebar";
 import { BottomNav, MOBILE_TABS, type MobileTabId } from "@/components/BottomNav";
 import { BurgerMenu, MenuLink } from "@/components/BurgerMenu";
@@ -9,67 +10,35 @@ import { WorkoutsView } from "@/components/WorkoutsView";
 import { AnalyticsView } from "@/components/AnalyticsView";
 import { ProgressView } from "@/components/ProgressView";
 import { HistoryView } from "@/components/HistoryView";
+import { WeatherView } from "@/components/WeatherView";
+import { CoachesView } from "@/components/CoachesView";
+import { Footer } from "@/components/Footer";
 import { useSettings } from "@/lib/storage";
 import { ChartBar, CloudSun, Dumbbell, History, TrendingUp, Users } from "lucide-react";
 
-const VIEW_META: Record<
-  TabId,
-  { title: string; subtitle: string; emptyTitle: string; emptyNote: string }
-> = {
-  workouts: {
-    title: "Workouts",
-    subtitle: "Log your training",
-    emptyTitle: "No workouts logged yet",
-    emptyNote: "Your sessions for this day will appear here. Add your first exercise to get started.",
-  },
-  analytics: {
-    title: "Analytics",
-    subtitle: "Insights from your sessions",
-    emptyTitle: "No data yet",
-    emptyNote: "Complete a workout and your volume, muscles and consistency insights will show up here.",
-  },
-  progress: {
-    title: "Progress",
-    subtitle: "Track strength over time",
-    emptyTitle: "Nothing tracked yet",
-    emptyNote: "Log workouts with weight and reps to build your progress charts.",
-  },
-  history: {
-    title: "History",
-    subtitle: "Your training calendar",
-    emptyTitle: "No history yet",
-    emptyNote: "Workout days will appear on the calendar as you log sessions.",
-  },
-  coaches: {
-    title: "Coaches",
-    subtitle: "Expert guidance",
-    emptyTitle: "No coaches listed yet",
-    emptyNote: "Certified coaches with specialties, experience and rates will be listed here.",
-  },
-  weather: {
-    title: "Weather",
-    subtitle: "Plan your session",
-    emptyTitle: "Weather unavailable",
-    emptyNote: "Allow location access to see current conditions and forecasts for your area.",
-  },
-};
+function isTab(value: string | null): value is TabId {
+  return !!value && (TABS as readonly { id: string }[]).some((tab) => tab.id === value);
+}
 
 export default function Home() {
-  // SSR-safe: default to "workouts" on first render, restore the
-  // persisted tab in a mount effect (same pattern as date state -
-  // server can't read localStorage, so a lazy initializer that
-  // reads it would hydrate-mismatch whenever a tab is saved).
+  // SSR-safe: default to "workouts" on first render, restore the tab
+  // from the URL or localStorage once mounted. useSearchParams also runs
+  // on soft navigation, so footer links switch views without a reload.
   const [activeTab, setActiveTabState] = useState<TabId>("workouts");
+  const searchParams = useSearchParams();
 
   useEffect(() => {
+    const fromUrl = searchParams.get("tab");
     const saved = useSettings.getActiveTab();
-    if (saved && (TABS as readonly { id: TabId }[]).some((t) => t.id === saved)) {
+    const next = isTab(fromUrl) ? fromUrl : isTab(saved) ? saved : null;
+    if (next) {
       // SSR-safe: restoring after mount keeps server HTML (always
       // "workouts") from mismatching the first client render.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setActiveTabState(saved as TabId);
+      setActiveTabState(next);
     }
-  }, []);
+  }, [searchParams]);
+
   const [burgerOpen, setBurgerOpen] = useState(false);
   const [workoutDate, setWorkoutDate] = useState<string | null>(null);
 
@@ -77,17 +46,22 @@ export default function Home() {
     setActiveTabState(tab);
     useSettings.setActiveTab(tab);
     setBurgerOpen(false);
+    // Keep the tab in the URL so footer links, bookmarks and reloads land
+    // on the right view without a round trip.
+    const url = new URL(window.location.href);
+    if (tab === "workouts") url.searchParams.delete("tab");
+    else url.searchParams.set("tab", tab);
+    window.history.replaceState(null, "", url);
   };
 
   // Keep mobile bottom nav type aligned with the full tab set.
   const mobileTab = useMemo<MobileTabId>(
-    () => (MOBILE_TABS as readonly { id: string }[]).some((t) => t.id === activeTab)
-      ? (activeTab as MobileTabId)
-      : "workouts",
+    () =>
+      (MOBILE_TABS as readonly { id: string }[]).some((t) => t.id === activeTab)
+        ? (activeTab as MobileTabId)
+        : "workouts",
     [activeTab],
   );
-
-  const meta = VIEW_META[activeTab];
 
   return (
     <div className="flex h-screen min-h-0 w-full flex-col overflow-hidden bg-background text-foreground lg:flex-row">
@@ -120,16 +94,13 @@ export default function Home() {
                 setActiveTab("workouts");
               }}
             />
+          ) : activeTab === "coaches" ? (
+            <CoachesView />
           ) : (
-            <>
-              <h1 className="font-display text-2xl font-bold tracking-tight">{meta.title}</h1>
-              <p className="mt-1 text-sm text-muted-2">{meta.subtitle}</p>
-              <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-card-border py-24 text-center">
-                <p className="font-display text-lg font-semibold text-muted">{meta.emptyTitle}</p>
-                <p className="mt-2 max-w-xs text-sm text-muted-2">{meta.emptyNote}</p>
-              </div>
-            </>
+            <WeatherView />
           )}
+
+          <Footer className="mt-8" />
         </div>
       </main>
 

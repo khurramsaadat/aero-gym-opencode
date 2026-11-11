@@ -36,6 +36,8 @@ export const STORAGE_KEYS = {
   wgerCache: "wger-exercise-cache",
   lengthUnit: "workout-length-unit",
   weightUnit: "workout-weight-unit",
+  weatherLocation: "workout-weather-location",
+  coachShortlist: "workout-coach-shortlist",
 } as const;
 
 type JsonValue = WorkoutLog | BodyWeightLog | MeasurementLog | DayMetaLog | WorkoutTemplate[] | FavoriteExercise[] | Record<number, WgerCacheEntry | WgerIndexEntry>;

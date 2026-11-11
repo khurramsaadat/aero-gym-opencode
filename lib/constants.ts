@@ -53,3 +53,5 @@ export const ACCENT = {
 export const APP_NAME = "Aero Gym";
 export const APP_URL = "https://aero-gym.netlify.app";
 export const COPYRIGHT = "2026 Aero Gym by Khurram | All rights reserved.";
+export const REPO_URL = "https://github.com/khurramsaadat/aero-gym-opencode";
+export const LAST_UPDATED = "11 November 2026";
