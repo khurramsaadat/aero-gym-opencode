@@ -24,3 +24,7 @@
 2. Phase-12 "Advanced" features included? - **PRD only** (option 1).
 3. Deploy to Netlify as part of this task? - **Local only for now** (option 1).
 4. Milestone order (Foundation - Daily Log - wger.de - Menu/Measurements - Analytics - Progress/History - Weather - Coaches/Share - PWA & Branding - Final audit)? - **Yes, that staging works** (option 1).
+
+## 2026-11-11 - M2 verification request
+
+> please check the codebase and make sure in the plan.md milestone M2 has been implemented

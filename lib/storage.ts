@@ -9,6 +9,8 @@ import type {
   WorkoutTemplate,
   FavoriteExercise,
   WgerCacheEntry,
+  WgerIndexEntry,
+  WgerSearchHit,
   BodyMeasurement,
   DayMeta,
   WgerExercise,
@@ -36,7 +38,7 @@ export const STORAGE_KEYS = {
   weightUnit: "workout-weight-unit",
 } as const;
 
-type JsonValue = WorkoutLog | BodyWeightLog | MeasurementLog | DayMetaLog | WorkoutTemplate[] | FavoriteExercise[] | Record<number, WgerCacheEntry>;
+type JsonValue = WorkoutLog | BodyWeightLog | MeasurementLog | DayMetaLog | WorkoutTemplate[] | FavoriteExercise[] | Record<number, WgerCacheEntry | WgerIndexEntry>;
 
 function read<T extends JsonValue>(key: string, fallback: T): T {
   try {
@@ -130,6 +132,21 @@ export const useMeasurements = {
     const entries = Object.entries(useMeasurements.get()).sort(([a], [b]) => (a < b ? -1 : 1));
     return entries.length ? entries[entries.length - 1][1] : null;
   },
+  /**
+   * Autosave a single field (PRD §4.5): merges the latest known values
+   * with any entry already stored for the day, then persists.
+   */
+  updateField: (date: string, field: keyof BodyMeasurement, value: number) => {
+    const log = useMeasurements.get();
+    const latest = useMeasurements.latest();
+    const merged = {
+      ...(latest ?? {}),
+      ...(log[date] ?? {}),
+      [field]: value,
+    } as BodyMeasurement;
+    log[date] = merged;
+    useMeasurements.set(log);
+  },
 };
 
 /* ------------------------------------------------------------------ */
@@ -169,6 +186,7 @@ export const useFavorites = {
   set: (favorites: FavoriteExercise[]) => {
     write(STORAGE_KEYS.favorites, favorites);
     emit(STORAGE_KEYS.favorites);
+    emit("favorites-changed");
   },
   isFavorite: (name: string) => useFavorites.get().some((f) => f.name === name),
   toggle: (exercise: Omit<FavoriteExercise, "name"> & { name: string }) => {
@@ -224,8 +242,8 @@ export const useSettings = {
 const WGER_CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 export const useWgerCache = {
-  getAll: (): Record<number, WgerCacheEntry> =>
-    read<Record<number, WgerCacheEntry>>(STORAGE_KEYS.wgerCache, {}),
+  getAll: (): Record<number, WgerCacheEntry | WgerIndexEntry> =>
+    read<Record<number, WgerCacheEntry | WgerIndexEntry>>(STORAGE_KEYS.wgerCache, {}),
   get: (id: number): WgerExercise | null => {
     const entry = useWgerCache.getAll()[id];
     if (!entry) return null;
@@ -233,11 +251,26 @@ export const useWgerCache = {
       useWgerCache.remove(id);
       return null;
     }
-    return entry.data;
+    return (entry as WgerCacheEntry).data as WgerExercise;
   },
   set: (id: number, data: WgerExercise) => {
     const all = useWgerCache.getAll();
     all[id] = { data, fetchedAt: Date.now() };
+    write(STORAGE_KEYS.wgerCache, all);
+  },
+  /** Full 966-exercise index, stored under the reserved id -1. */
+  getIndex: (): WgerSearchHit[] | null => {
+    const entry = useWgerCache.getAll()[-1];
+    if (!entry) return null;
+    if (Date.now() - entry.fetchedAt > WGER_CACHE_TTL_MS) {
+      useWgerCache.remove(-1);
+      return null;
+    }
+    return (entry as WgerIndexEntry).data as WgerSearchHit[];
+  },
+  setIndex: (hits: WgerSearchHit[]) => {
+    const all = useWgerCache.getAll();
+    all[-1] = { data: hits, fetchedAt: Date.now() };
     write(STORAGE_KEYS.wgerCache, all);
   },
   remove: (id: number) => {
@@ -250,3 +283,35 @@ export const useWgerCache = {
     emit(STORAGE_KEYS.wgerCache);
   },
 };
+
+/* ------------------------------------------------------------------ */
+/*  Backup / restore (PRD §4.5: export/import with drag-and-drop)      */
+/* ------------------------------------------------------------------ */
+
+/** Snapshot of every PRD storage key for backup download. */
+export function exportAllData(): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const key of Object.values(STORAGE_KEYS)) {
+    try {
+      const raw = safeStorage.getItem(key);
+      if (!raw) continue;
+      out[key] = JSON.parse(raw);
+    } catch {
+      /* skip unreadable key */
+    }
+  }
+  return out;
+}
+
+/** Restore a backup snapshot over the PRD storage keys. */
+export function importAllData(data: Record<string, unknown>): void {
+  for (const key of Object.values(STORAGE_KEYS)) {
+    if (!(key in data)) continue;
+    try {
+      safeStorage.setItem(key, JSON.stringify(data[key]));
+      emit(key);
+    } catch {
+      /* skip unwritable key */
+    }
+  }
+}

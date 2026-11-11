@@ -102,10 +102,24 @@ export interface WgerExercise {
   musclesSecondary: string[];
   equipment: string[];
   image?: string;
+  /** step-by-step form guide parsed from the wger description (PRD §4.10) */
+  instructions?: string[];
+}
+
+/** Lightweight index entry: full-name hit used for client-side search. */
+export interface WgerSearchHit {
+  id: number;
+  name: string;
 }
 
 /** localStorage cache entry for a wger exercise (PRD §4.10: 7-day cache) */
 export interface WgerCacheEntry {
   data: WgerExercise;
+  fetchedAt: number; // epoch ms
+}
+
+/** localStorage cache entry for the full wger index (7-day TTL). */
+export interface WgerIndexEntry {
+  data: WgerSearchHit[];
   fetchedAt: number; // epoch ms
 }

@@ -14,13 +14,22 @@ import {
   Share2,
 } from "lucide-react";
 import type { Workout, SetType, Equipment } from "@/lib/types";
+import { getWgerIdOverride } from "@/lib/exercise-db";
 import { toDisplay, toKg, type WeightUnit } from "@/lib/unit";
 import { vibrate } from "@/lib/haptics";
 import { playSetComplete, playPrFanfare, playWorkoutComplete } from "@/lib/sounds";
 import { subscribeToStorage, useFavorites } from "@/lib/storage";
+import { notifyWorkoutComplete } from "@/lib/notifications";
+import { FormGuide } from "./FormGuide";
 import { Confetti } from "./Confetti";
 import { Modal } from "./Modal";
-import { ExerciseSearch } from "./ExerciseSearch";
+import { ExerciseSearch, type SearchSelectable } from "./ExerciseSearch";
+import {
+  fetchWgerExercise,
+  getWgerImageUrl,
+  mapWgerEquipment,
+  categoryForWgerMuscles,
+} from "@/lib/wger";
 
 const EQUIPMENT_OPTIONS: Equipment[] = [
   "Dumbbell",
@@ -123,10 +132,11 @@ export function WorkoutCard({
       vibrate("success");
       if (pr) playPrFanfare();
       else playWorkoutComplete();
+      notifyWorkoutComplete(workout.name);
     } else if (!isComplete) {
       prRef.current = false;
     }
-  }, [isComplete, pr]);
+  }, [isComplete, pr, workout.name]);
 
   const commit = (patch: Partial<Workout>) => {
     setJustCompleted(false);
@@ -164,14 +174,35 @@ export function WorkoutCard({
     commit({ weight: kg });
   };
 
-  const handleSwap = (ex: { name: string; category: string; equipment?: Equipment }) => {
+  const handleSwap = async (ex: SearchSelectable) => {
+    if (ex.kind === "local") {
+      // User-saved equipment keeps priority; fall back to the local
+      // exercise's default, then to whatever was saved before.
+      const id = getWgerIdOverride(ex.data.name);
+      commit({
+        name: ex.data.name,
+        category: ex.data.category,
+        equipment: ex.data.equipment ?? workout.equipment,
+        exerciseId: id,
+        image: id ? getWgerImageUrl(id) : undefined,
+        muscles: ex.data.muscles,
+        musclesSecondary: ex.data.musclesSecondary,
+      });
+      setSwapOpen(false);
+      return;
+    }
+    // wger selection: resolve details, then patch. The wger-provided
+    // equipment becomes the stored default - the user can override it
+    // afterwards (user-saved value always wins the badge).
+    const data = await fetchWgerExercise(ex.data.id);
     commit({
-      name: ex.name,
-      category: ex.category,
-      equipment: ex.equipment ?? workout.equipment,
-      exerciseId: undefined,
-      image: undefined,
-      muscles: ex.name === workout.name ? workout.muscles : undefined,
+      name: data?.name ?? ex.data.name,
+      category: data ? categoryForWgerMuscles(data.muscles) : workout.category,
+      equipment: data?.equipment[0] ? mapWgerEquipment(data.equipment[0]) : workout.equipment,
+      exerciseId: data?.id,
+      image: data?.image,
+      muscles: data?.muscles,
+      musclesSecondary: data?.musclesSecondary,
     });
     setSwapOpen(false);
   };
@@ -242,6 +273,7 @@ export function WorkoutCard({
                 {workout.equipment}
               </span>
             )}
+            {workout.exerciseId && <FormGuide exerciseId={workout.exerciseId} />}
             <button
               onClick={() => onToggleFavorite(workout)}
               aria-label={isFav ? "Unpin from favorites" : "Pin to favorites"}

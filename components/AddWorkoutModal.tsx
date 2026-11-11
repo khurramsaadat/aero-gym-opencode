@@ -1,10 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import type { LocalExercise } from "@/lib/exercise-db";
-import type { Equipment } from "@/lib/types";
+import { getWgerIdOverride } from "@/lib/exercise-db";
+import type { Equipment, WorkoutCategory } from "@/lib/types";
+import type { WgerExercise, WgerSearchHit } from "@/lib/types";
+import {
+  categoryForWgerMuscles,
+  fetchWgerExercise,
+  getWgerImageUrl,
+  mapWgerEquipment,
+} from "@/lib/wger";
 import { Modal } from "./Modal";
-import { ExerciseSearch } from "./ExerciseSearch";
+import { ExerciseSearch, type SearchSelectable } from "./ExerciseSearch";
 
 const EQUIPMENT_OPTIONS: Equipment[] = [
   "Dumbbell",
@@ -28,17 +37,25 @@ interface AddWorkoutModalProps {
     sets: number;
     duration: number;
     equipment?: Equipment;
+    exerciseId?: number;
+    image?: string;
+    muscles?: string[];
+    musclesSecondary?: string[];
   }) => void;
 }
 
+type Selected =
+  | { kind: "local"; data: LocalExercise; image?: string }
+  | { kind: "wger"; hit: WgerSearchHit; data: WgerExercise | null };
+
 /**
  * Add Exercise modal (PRD §4.2): 2-step flow.
- * Step 1: search the local 200+ database. Step 2: confirm name,
- * equipment selector, sets/reps/duration, then add.
+ * Step 1: dual search (local 200+ + wger.de index). Step 2: confirm name
+ * with wger preview image, equipment selector, sets/reps/duration, add.
  */
 export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) {
   const [step, setStep] = useState(1);
-  const [selected, setSelected] = useState<LocalExercise | null>(null);
+  const [selected, setSelected] = useState<Selected | null>(null);
   const [equipment, setEquipment] = useState<Equipment | undefined>();
   const [sets, setSets] = useState(3);
   const [reps, setReps] = useState(10);
@@ -60,43 +77,140 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
     onClose();
   };
 
-  const handleSelect = (ex: LocalExercise) => {
-    setSelected(ex);
-    setEquipment(ex.equipment);
-    setSets(ex.sets);
-    setReps(ex.reps);
-    setWeight(ex.weight);
-    setDuration(ex.duration);
+  const handleSelect = (ex: SearchSelectable) => {
+    if (ex.kind === "local") {
+      const override = getWgerIdOverride(ex.data.name);
+      setSelected({
+        kind: "local",
+        data: ex.data,
+        image: override ? getWgerImageUrl(override) : undefined,
+      });
+    } else {
+      // Resolve wger details (muscles, equipment, instructions, image).
+      setSelected({ kind: "wger", hit: ex.data, data: null });
+    }
     setStep(2);
   };
 
+  // Fetch wger details after a wger selection lands; prefill attributes
+  // once the detail arrives.
+  useEffect(() => {
+    if (!selected || selected.kind !== "wger" || selected.data) return;
+    let cancelled = false;
+    fetchWgerExercise(selected.hit.id).then((data) => {
+      if (cancelled) return;
+      setSelected((s) => (s && s.kind === "wger" ? { ...s, data } : s));
+      if (!data) return;
+      const isCardio = categoryForWgerMuscles(data.muscles) === "Cardio";
+      setEquipment(data.equipment[0] ? mapWgerEquipment(data.equipment[0]) : undefined);
+      setSets(isCardio ? 1 : 3);
+      setReps(isCardio ? 0 : 10);
+      setWeight(0);
+      setDuration(isCardio ? 30 : 0);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [selected]);
+
+  const preview =
+    selected?.kind === "local"
+      ? selected.image
+      : selected?.kind === "wger"
+        ? selected.data?.image
+        : undefined;
+
+  const category: WorkoutCategory | "" =
+    selected?.kind === "local"
+      ? selected.data.category
+      : selected?.kind === "wger" && selected.data
+        ? categoryForWgerMuscles(selected.data.muscles)
+        : "";
+
   const handleAdd = () => {
     if (!selected) return;
-    onAdd({
-      name: selected.name,
-      category: selected.category,
-      weight,
-      reps,
-      sets,
-      duration,
-      equipment,
-    });
+    if (selected.kind === "local") {
+      const d = selected.data;
+      onAdd({
+        name: d.name,
+        category: d.category,
+        weight,
+        reps,
+        sets,
+        duration,
+        equipment,
+        exerciseId: getWgerIdOverride(d.name),
+        image: selected.image,
+        muscles: d.muscles,
+        musclesSecondary: d.musclesSecondary,
+      });
+    } else {
+      const d = selected.data;
+      if (!d) return;
+      const isCardio = category === "Cardio";
+      onAdd({
+        name: d.name,
+        category,
+        weight: isCardio ? 0 : weight,
+        reps: isCardio ? 0 : reps,
+        sets: isCardio ? 1 : sets,
+        duration: isCardio ? duration || 30 : duration,
+        equipment,
+        exerciseId: d.id,
+        image: d.image,
+        muscles: d.muscles,
+        musclesSecondary: d.musclesSecondary,
+      });
+    }
     handleClose();
   };
 
+  const title =
+    step === 1 ? "Add exercise" : selected?.kind === "wger" && !selected.data
+      ? "Loading exercise"
+      : `Add - ${selected?.kind === "local" ? selected.data.name : selected?.data?.name ?? ""}`;
+
   return (
-    <Modal open={open} onClose={handleClose} title={step === 1 ? "Add exercise" : `Add - ${selected?.name ?? ""}`}>
+    <Modal open={open} onClose={handleClose} title={title}>
       {step === 1 && (
-        <ExerciseSearch onSelect={handleSelect} label="Search 200+ exercises" placeholder="e.g. bench press, squat" />
+        <ExerciseSearch onSelect={handleSelect} label="Search 200+ exercises + wger.de" placeholder="e.g. bench press, squat" />
       )}
       {step === 2 && selected && (
         <div className="space-y-3">
-          <div className="rounded-2xl border border-card-border bg-card p-4">
-            <h3 className="font-display text-base font-bold text-foreground">{selected.name}</h3>
-            <p className="mt-1 text-[11px] uppercase tracking-widest text-muted-2">
-              {selected.category}
-              {selected.muscles?.length ? ` - ${selected.muscles.slice(0, 3).join(" / ")}` : ""}
-            </p>
+          <div className="flex items-start gap-3 rounded-2xl border border-card-border bg-card p-4">
+            {preview ? (
+              <Image
+                src={preview}
+                alt={selected.kind === "local" ? selected.data.name : selected.data?.name ?? ""}
+                width={80}
+                height={80}
+                className="h-20 w-20 rounded-xl object-cover"
+                sizes="80px"
+              />
+            ) : (
+              <div className="flex h-20 w-20 items-center justify-center rounded-xl bg-gradient-to-br from-accent-soft/50 to-card-border text-2xl">
+                <span className="text-2xl leading-none text-muted-2">+</span>
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <h3 className="font-display text-base font-bold text-foreground">
+                {selected.kind === "local" ? selected.data.name : selected.data?.name ?? selected.hit.name}
+              </h3>
+              <p className="mt-0.5 text-[11px] uppercase tracking-widest text-muted-2">
+                {category}
+                {selected.kind === "local"
+                  ? ` - ${selected.data.muscles?.slice(0, 3).join(" / ") ?? ""}`
+                  : selected.data
+                    ? ` - ${selected.data.muscles?.slice(0, 3).join(" / ") ?? ""}`
+                    : ""}
+              </p>
+              {selected.kind === "wger" && !selected.data && (
+                <p className="mt-1 flex items-center gap-1.5 text-[11px] text-muted-2">
+                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-muted-2 border-t-transparent" />
+                  Fetching details from wger.de...
+                </p>
+              )}
+            </div>
           </div>
 
           <div>
@@ -137,19 +251,19 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
               <label className="text-[10px] font-bold uppercase tracking-widest text-muted-2">Reps</label>
               <input
                 type="number"
-                min={1}
+                min={0}
                 value={reps}
-                onChange={(e) => setReps(Math.max(1, Number(e.target.value) || 1))}
+                onChange={(e) => setReps(Math.max(0, Number(e.target.value) || 0))}
                 className="mt-1 w-full rounded-lg border border-card-border bg-background px-2 py-1.5 text-sm text-center text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
-            {selected.category === "Cardio" ? (
+            {category === "Cardio" ? (
               <div>
                 <label className="text-[10px] font-bold uppercase tracking-widest text-muted-2">Minutes</label>
                 <input
                   type="number"
                   min={1}
-                  value={duration || selected.duration || 30}
+                  value={duration || 30}
                   onChange={(e) => setDuration(Math.max(1, Number(e.target.value) || 1))}
                   className="mt-1 w-full rounded-lg border border-card-border bg-background px-2 py-1.5 text-sm text-center text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
@@ -172,7 +286,8 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
 
           <button
             onClick={handleAdd}
-            className="mt-2 w-full rounded-full bg-accent px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-accent-text transition-colors hover:opacity-90"
+            disabled={selected.kind === "wger" && !selected.data}
+            className="mt-2 w-full rounded-full bg-accent px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-accent-text transition-colors hover:opacity-90 disabled:cursor-wait disabled:opacity-50"
           >
             Add exercise
           </button>

@@ -5,6 +5,12 @@ import { Plus, Copy, CheckCircle } from "lucide-react";
 import type { Workout, WorkoutLog, FavoriteExercise } from "@/lib/types";
 import { useWorkoutLogs, subscribeToStorage, useFavorites } from "@/lib/storage";
 import { formatDateKey, addDays, isSameDay } from "@/lib/dates";
+import { getWgerIdOverride } from "@/lib/exercise-db";
+import {
+  getWgerImageUrl,
+  fetchWgerExercise,
+  mapWgerEquipment,
+} from "@/lib/wger";
 import { getDailyQuote } from "@/lib/quotes";
 import { useWeightUnit } from "@/hooks/useUnit";
 import { DateHeader } from "./DateHeader";
@@ -153,6 +159,10 @@ export function WorkoutsView({ onOpenWeather }: WorkoutsViewProps) {
       sets: number;
       duration: number;
       equipment?: Workout["equipment"];
+      exerciseId?: number;
+      image?: string;
+      muscles?: string[];
+      musclesSecondary?: string[];
     }) => {
       if (!date) return;
       const prev = prevBest(spec.name);
@@ -170,7 +180,10 @@ export function WorkoutsView({ onOpenWeather }: WorkoutsViewProps) {
         prevWeight: prev.weight,
         prevReps: prev.reps,
         equipment: spec.equipment,
-        muscles: [],
+        muscles: spec.muscles ?? [],
+        musclesSecondary: spec.musclesSecondary ?? [],
+        exerciseId: spec.exerciseId,
+        image: spec.image,
       };
       persist([...dayWorkouts, workout]);
       setAddOpen(false);
@@ -195,6 +208,53 @@ export function WorkoutsView({ onOpenWeather }: WorkoutsViewProps) {
     }));
     persist(copied);
   }, [date, logs, persist]);
+
+  // Backfill wger metadata for logged workouts: correct images via the
+  // verified ID overrides, and muscles/equipment from the wger cache
+  // for exercises that were resolved online (M3).
+  useEffect(() => {
+    if (!date) return;
+    const missing = dayWorkouts.filter(
+      (w) => (!w.image && getWgerIdOverride(w.name)) || (w.exerciseId && !w.muscles?.length),
+    );
+    if (missing.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const patches: Array<{ id: string; patch: Partial<Workout> }> = [];
+      for (const w of missing) {
+        if (cancelled) return;
+        const patch: Partial<Workout> = {};
+        if (!w.image) {
+          const id = getWgerIdOverride(w.name);
+          if (id) {
+            patch.image = getWgerImageUrl(id);
+            patch.exerciseId = id;
+          }
+        }
+        if (w.exerciseId && !w.muscles?.length) {
+          const data = await fetchWgerExercise(w.exerciseId);
+          if (data) {
+            patch.muscles = data.muscles;
+            patch.musclesSecondary = data.musclesSecondary;
+            if (!w.equipment && data.equipment[0]) patch.equipment = mapWgerEquipment(data.equipment[0]);
+          }
+        }
+        if (Object.keys(patch).length > 0) patches.push({ id: w.id, patch });
+      }
+      if (!cancelled && patches.length > 0) {
+        persist(
+          dayWorkouts.map((w) => {
+            const p = patches.find((x) => x.id === w.id);
+            return p ? { ...w, ...p.patch } : w;
+          }),
+        );
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [date, dayWorkouts]);
 
   const toggleFavorite = useCallback(
     (w: Workout) => {
