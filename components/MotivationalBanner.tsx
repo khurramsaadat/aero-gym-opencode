@@ -25,14 +25,14 @@ export function getDailyPhoto(): string {
  */
 export function MotivationalBanner({ quote }: { quote: string }) {
   return (
-    <div className="hidden rounded-2xl xl:block">
+    <div className="hidden rounded-2xl lg:block">
       <div className="relative overflow-hidden rounded-2xl border border-card-border bg-card">
         <Image
           src={getDailyPhoto()}
           alt="Fitness motivation"
           width={1400}
           height={340}
-          className="h-[170px] w-full object-cover sm:h-[200px] xl:h-[170px]"
+          className="h-[170px] w-full object-cover sm:h-[200px] lg:h-[170px]"
           loading="eager"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />

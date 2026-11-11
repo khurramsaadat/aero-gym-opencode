@@ -59,8 +59,8 @@ export function ScrollPicker({
     if (!open) return;
     const display = toDisplay(value > 0 ? value : min + Math.floor(maxIndex / 2) * step);
     const idx = Math.min(maxIndex, Math.max(0, Math.round((display - min) / step)));
-    setSelectedIndex(idx);
     const t = window.setTimeout(() => {
+      setSelectedIndex(idx);
       const el = listRef.current;
       if (el) el.scrollTop = Math.max(0, idx * ROW_H - (ROW_H * (VISIBLE_ROWS - 1)) / 2);
     }, 50);

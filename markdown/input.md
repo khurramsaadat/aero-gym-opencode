@@ -28,3 +28,9 @@
 ## 2026-11-11 - M2 verification request
 
 > please check the codebase and make sure in the plan.md milestone M2 has been implemented
+
+## 2026-11-11 - M5 and M6 implementation
+
+> please check and fix all errors in the terminal tab, this is a RULE.
+> please can you go ahead and complete the milestones M5 and M6 stagewise and then test all pages and all button with playwright
+

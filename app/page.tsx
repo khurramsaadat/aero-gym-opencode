@@ -6,8 +6,11 @@ import { BottomNav, MOBILE_TABS, type MobileTabId } from "@/components/BottomNav
 import { BurgerMenu, MenuLink } from "@/components/BurgerMenu";
 import { StickyTopBar } from "@/components/StickyTopBar";
 import { WorkoutsView } from "@/components/WorkoutsView";
+import { AnalyticsView } from "@/components/AnalyticsView";
+import { ProgressView } from "@/components/ProgressView";
+import { HistoryView } from "@/components/HistoryView";
 import { useSettings } from "@/lib/storage";
-import { Dumbbell, Users } from "lucide-react";
+import { ChartBar, CloudSun, Dumbbell, History, TrendingUp, Users } from "lucide-react";
 
 const VIEW_META: Record<
   TabId,
@@ -68,6 +71,7 @@ export default function Home() {
     }
   }, []);
   const [burgerOpen, setBurgerOpen] = useState(false);
+  const [workoutDate, setWorkoutDate] = useState<string | null>(null);
 
   const setActiveTab = (tab: TabId) => {
     setActiveTabState(tab);
@@ -86,7 +90,7 @@ export default function Home() {
   const meta = VIEW_META[activeTab];
 
   return (
-    <div className="flex h-screen min-h-0 w-full flex-col overflow-hidden bg-background text-foreground xl:flex-row">
+    <div className="flex h-screen min-h-0 w-full flex-col overflow-hidden bg-background text-foreground lg:flex-row">
       {/* Sticky mobile top bar */}
       <StickyTopBar
         menuOpen={burgerOpen}
@@ -98,10 +102,24 @@ export default function Home() {
       <Sidebar activeTab={activeTab} onSelect={setActiveTab} />
 
       {/* Main area */}
-      <main className="flex min-h-0 flex-1 flex-col xl:ml-0">
-        <div className="mx-auto w-full max-w-3xl flex-1 overflow-y-auto px-4 pb-24 pt-16 xl:pt-8">
+      <main className="flex min-h-0 flex-1 flex-col">
+        <div className="mx-auto w-full max-w-3xl flex-1 overflow-y-auto px-4 pb-24 pt-16 lg:pt-8">
           {activeTab === "workouts" ? (
-            <WorkoutsView onOpenWeather={() => setActiveTab("weather")} />
+            <WorkoutsView
+              requestedDate={workoutDate}
+              onOpenWeather={() => setActiveTab("weather")}
+            />
+          ) : activeTab === "analytics" ? (
+            <AnalyticsView />
+          ) : activeTab === "progress" ? (
+            <ProgressView />
+          ) : activeTab === "history" ? (
+            <HistoryView
+              onOpenDay={(date) => {
+                setWorkoutDate(date);
+                setActiveTab("workouts");
+              }}
+            />
           ) : (
             <>
               <h1 className="font-display text-2xl font-bold tracking-tight">{meta.title}</h1>
@@ -120,12 +138,28 @@ export default function Home() {
 
       {/* Burger menu */}
       <BurgerMenu open={burgerOpen} onClose={() => setBurgerOpen(false)}>
-        <MenuLink index={0} icon={Dumbbell} onClick={() => setActiveTab("workouts")}>
-          Workouts
-        </MenuLink>
-        <MenuLink index={1} icon={Users} onClick={() => setActiveTab("coaches")}>
-          Coaches
-        </MenuLink>
+        {(
+          [
+            { id: "workouts", label: "Workouts", icon: Dumbbell },
+            { id: "analytics", label: "Analytics", icon: ChartBar },
+            { id: "progress", label: "Progress", icon: TrendingUp },
+            { id: "history", label: "History", icon: History },
+            { id: "coaches", label: "Coaches", icon: Users },
+            { id: "weather", label: "Weather", icon: CloudSun },
+          ] as const
+        ).map((link, index) => (
+          <MenuLink
+            key={link.id}
+            index={index}
+            icon={link.icon}
+            onClick={() => {
+              setActiveTab(link.id);
+              setBurgerOpen(false);
+            }}
+          >
+            {link.label}
+          </MenuLink>
+        ))}
       </BurgerMenu>
     </div>
   );

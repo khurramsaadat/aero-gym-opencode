@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Star, X, Check } from "lucide-react";
-import { subscribeToStorage, useFavorites } from "@/lib/storage";
+import { STORAGE_KEYS, subscribeToStorage, useFavorites } from "@/lib/storage";
 import type { FavoriteExercise } from "@/lib/types";
 
 interface FavoritesBarProps {
@@ -21,7 +21,7 @@ export function FavoritesBar({ onAdd }: FavoritesBarProps) {
   const flashTimeout = useRef<number | null>(null);
 
   useEffect(() => {
-    return subscribeToStorage("favorites-changed", () => setFavoritesState(useFavorites.get()));
+    return subscribeToStorage(STORAGE_KEYS.favorites, () => setFavoritesState(useFavorites.get()));
   }, []);
 
   const limited = favorites.slice(0, 10);

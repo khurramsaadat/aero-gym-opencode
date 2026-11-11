@@ -50,6 +50,7 @@ export const DAILY_QUOTES: string[] = [
   "Excuses don't burn calories.",
   "Stronger than yesterday.",
   "Make today count.",
+  "Small steps every day beat giant leaps once in a while.",
 ];
 
 export function getDailyQuote(): string {

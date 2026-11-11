@@ -315,3 +315,11 @@ export function importAllData(data: Record<string, unknown>): void {
     }
   }
 }
+
+/** Remove every PRD storage key (settings "clear all data"). */
+export function clearAllData(): void {
+  for (const key of Object.values(STORAGE_KEYS)) {
+    remove(key);
+    emit(key);
+  }
+}

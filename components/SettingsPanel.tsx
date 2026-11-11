@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Bell, Clock, Download, Info, Smartphone, Trash2, Upload, Volume2 } from "lucide-react";
+import { Bell, Clock, Download, Info, Smartphone, Upload, Volume2 } from "lucide-react";
 import {
   clearAllData,
   exportAllData,
@@ -242,7 +242,7 @@ export function SettingsPanel() {
               <button
                 type="button"
                 onClick={confirmImport}
-                className="flex-1 rounded-full bg-accent px-4 py-2 text-sm font-bold uppercase tracking-wider text-accent-text transition-colors hover:opacity-90"
+                className="flex-1 rounded-full bg-accent px-4 py-2 text-sm font-bold uppercase tracking-wider text-accent-contrast transition-colors hover:opacity-90"
               >
                 Import
               </button>

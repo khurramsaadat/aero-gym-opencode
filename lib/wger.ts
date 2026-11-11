@@ -13,8 +13,13 @@ const API = "https://wger.de/api/v2";
 const LANGUAGE = 2; // English
 const UA = { "User-Agent": "aero-gym/0.1 (https://aero-gym.netlify.app)" };
 
-export function getWgerImageUrl(id: number): string {
-  return `${API}/exerciseimage/${id}/`;
+/**
+ * Older builds stored the JSON API endpoint as an image URL. Next's
+ * image optimizer cannot render that, so reject it everywhere.
+ */
+export function isUsableImageUrl(url?: string): url is string {
+  if (!url) return false;
+  return !/\/api\/v2\/exerciseimage\/\d+\/?$/.test(url);
 }
 
 /* ------------------------------------------------------------------ */
@@ -177,7 +182,8 @@ export function parseInstructions(description: string, max = 8): string[] {
 /** Fetch + cache one exercise by id. Returns null on any failure. */
 export async function fetchWgerExercise(id: number): Promise<WgerExercise | null> {
   const cached = useWgerCache.get(id);
-  if (cached) return cached;
+  // Ignore legacy cache entries whose image is the JSON endpoint.
+  if (cached && isUsableImageUrl(cached.image)) return cached;
   try {
     const res = await fetch(`${API}/exerciseinfo/${id}/?language=${LANGUAGE}`, { headers: UA });
     if (!res.ok) return null;
@@ -192,7 +198,7 @@ export async function fetchWgerExercise(id: number): Promise<WgerExercise | null
       musclesSecondary: (ex.muscles_secondary ?? []).map(nameOf).filter(Boolean),
       equipment: (ex.equipment ?? []).map(nameOfEq).filter(Boolean),
       // Prefer the small thumbnail (200x200) for 80x80 card display.
-      image: main?.thumbnails?.small ?? main?.thumbnails?.medium ?? main?.image ?? getWgerImageUrl(ex.id),
+      image: main?.thumbnails?.small ?? main?.thumbnails?.medium ?? main?.image,
       instructions: parseInstructions(description),
     };
     useWgerCache.set(id, data);

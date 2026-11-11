@@ -24,7 +24,7 @@ interface BottomNavProps {
  */
 export function BottomNav({ activeTab, onSelect }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center gap-1 bg-background/92 backdrop-blur-sm border-t border-card-border px-1 py-2 xl:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 flex items-center gap-1 bg-background/92 backdrop-blur-sm border-t border-card-border px-1 py-2 lg:hidden">
       <div className="w-12 flex justify-center">
         <ThemeToggle />
       </div>

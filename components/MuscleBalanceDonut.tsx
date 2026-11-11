@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Dumbbell } from "lucide-react";
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import type { LabelPayload } from "recharts";
+import type { PieLabelRenderProps } from "recharts";
 import type { WorkoutLog } from "@/lib/types";
 import { STORAGE_KEYS, subscribeToStorage, useWorkoutLogs } from "@/lib/storage";
 
@@ -32,11 +32,19 @@ function mapMuscle(muscle: string): string {
   return "Other";
 }
 
-/** Gold slice first, then dark grays so the white labels always read. */
-const PALETTE = ["#C9A227", "#3f3f46", "#52525b", "#71717a", "#a1a1aa", "#d4d4d8", "#78716c"];
+/** Brand slice first, then theme neutrals. */
+const PALETTE = [
+  "var(--color-chart-1)",
+  "var(--color-chart-3)",
+  "var(--color-chart-6)",
+  "var(--color-chart-5)",
+  "var(--color-chart-4)",
+  "var(--color-chart-7)",
+  "var(--color-chart-2)",
+];
 
 /** In-slice label: bold white, shown for slices >= 4.5% of volume. */
-function renderSliceLabel(labelProps: LabelPayload) {
+function renderSliceLabel(labelProps: PieLabelRenderProps) {
   const { cx, cy, midAngle, percent, payload } = labelProps;
   const pct = percent ?? 0;
   if (!payload || pct < 0.045 || cx === undefined || cy === undefined || midAngle === undefined) {
@@ -50,6 +58,9 @@ function renderSliceLabel(labelProps: LabelPayload) {
       x={x}
       y={y}
       fill="#ffffff"
+      stroke="rgba(0,0,0,0.4)"
+      strokeWidth={2}
+      paintOrder="stroke"
       textAnchor="middle"
       dominantBaseline="central"
       fontWeight={700}
@@ -131,7 +142,9 @@ export function MuscleBalanceDonut() {
                   fontSize: 12,
                   fontWeight: 600,
                 }}
-                formatter={(value: number) => [value, "workouts"]}
+                formatter={(value: unknown): [number, string] | string =>
+                  typeof value === "number" ? [value, "workouts"] : "-"
+                }
                 labelFormatter={(label) => `Muscle: ${label}`}
               />
               <Legend verticalAlign="bottom" height={28} wrapperStyle={{ marginTop: 4 }} />

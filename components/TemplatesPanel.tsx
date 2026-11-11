@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dumbbell, FolderPlus, Plus, Share2, Trash2 } from "lucide-react";
 import type { Workout, WorkoutTemplate } from "@/lib/types";
 import { STORAGE_KEYS, subscribeToStorage, useTemplates, useWorkoutLogs } from "@/lib/storage";
@@ -32,34 +32,41 @@ function toTemplateExercises(workouts: Workout[]): Workout[] {
  */
 export function TemplatesPanel() {
   const [date, setDate] = useState<string | null>(null);
-  const dateRef = useRef<string | null>(null);
   const [templates, setTemplatesState] = useState(() => useTemplates.get());
+  const [logs, setLogs] = useState(() => useWorkoutLogs.get());
   const [saveOpen, setSaveOpen] = useState(false);
   const [templateName, setTemplateName] = useState("");
   const [undoTarget, setUndoTarget] = useState<WorkoutTemplate | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   const todayWorkouts = useMemo(
-    () => (dateRef.current ? useWorkoutLogs.get()[dateRef.current] ?? [] : []),
-    [date],
+    () => (date ? logs[date] ?? [] : []),
+    [date, logs],
   );
-
-  const refresh = () => setTemplatesState(useTemplates.get());
 
   useEffect(() => {
     const today = formatDateKey(new Date());
-    dateRef.current = today;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDate(today);
-    refresh();
+    setTemplatesState(useTemplates.get());
+    setLogs(useWorkoutLogs.get());
   }, []);
 
   useEffect(() => {
-    return subscribeToStorage(STORAGE_KEYS.templates, refresh);
-  }, [refresh]);
+    const unsubTemplates = subscribeToStorage(STORAGE_KEYS.templates, () =>
+      setTemplatesState(useTemplates.get()),
+    );
+    const unsubLogs = subscribeToStorage(STORAGE_KEYS.workoutLogs, () =>
+      setLogs(useWorkoutLogs.get()),
+    );
+    return () => {
+      unsubTemplates();
+      unsubLogs();
+    };
+  }, []);
 
   const handleSave = () => {
-    const name = templateName.trim() || `Plan - ${dateRef.current ?? ""}`;
+    const name = templateName.trim() || `Plan - ${date ?? ""}`;
     const existing = useTemplates.get().some((t) => t.name === name);
     const next = existing
       ? useTemplates.get().map((t) => (t.name === name ? { ...t, exercises: toTemplateExercises(todayWorkouts) } : t))
@@ -71,10 +78,8 @@ export function TemplatesPanel() {
   };
 
   const handleLoad = (t: WorkoutTemplate) => {
-    const d = dateRef.current;
-    if (!d) return;
-    const day = useWorkoutLogs.get()[d] ?? [];
-    useWorkoutLogs.updateDay(d, [...day, ...toTemplateExercises(t.exercises)]);
+    if (!date) return;
+    useWorkoutLogs.updateDay(date, [...todayWorkouts, ...toTemplateExercises(t.exercises)]);
     setToast(`Loaded ${t.exercises.length} exercises into today`);
   };
 
@@ -173,7 +178,7 @@ export function TemplatesPanel() {
               autoFocus
               value={templateName}
               onChange={(e) => setTemplateName(e.target.value)}
-              placeholder={`Plan - ${dateRef.current ?? ""}`}
+              placeholder={`Plan - ${date ?? ""}`}
               className="w-full rounded-xl border border-card-border bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-2 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30"
             />
             <div className="flex gap-2">
@@ -187,7 +192,7 @@ export function TemplatesPanel() {
               <button
                 type="button"
                 onClick={handleSave}
-                className="flex-1 rounded-full bg-accent px-4 py-2 text-sm font-bold uppercase tracking-wider text-accent-text transition-colors hover:opacity-90"
+                className="flex-1 rounded-full bg-accent px-4 py-2 text-sm font-bold uppercase tracking-wider text-accent-contrast transition-colors hover:opacity-90"
               >
                 Save template
               </button>

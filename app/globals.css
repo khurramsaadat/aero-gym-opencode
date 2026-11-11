@@ -22,6 +22,14 @@
   --color-accent: #C9A227;
   --color-accent-soft: rgba(201, 162, 39, 0.14);
   --color-accent-text: #C9A227;
+  --color-accent-contrast: #17140a;
+  --color-chart-1: #C9A227;
+  --color-chart-2: #e0b93f;
+  --color-chart-3: #8a6d1f;
+  --color-chart-4: #d4d4d8;
+  --color-chart-5: #a1a1aa;
+  --color-chart-6: #71717a;
+  --color-chart-7: #78716c;
   --color-muted: #8a8a8a;
   --color-muted-2: rgba(255, 255, 255, 0.35);
   --color-muted-3: rgba(255, 255, 255, 0.18);
@@ -39,6 +47,14 @@
   --color-accent: #00BFA5;
   --color-accent-soft: rgba(0, 191, 165, 0.12);
   --color-accent-text: #00bfa5;
+  --color-accent-contrast: #052622;
+  --color-chart-1: #00bfa5;
+  --color-chart-2: #33cdb7;
+  --color-chart-3: #009987;
+  --color-chart-4: #6b7280;
+  --color-chart-5: #9ca3af;
+  --color-chart-6: #374151;
+  --color-chart-7: #d1d5db;
   --color-muted: #4a5568; /* PRD neutral-400 */
   --color-muted-2: #374151; /* PRD neutral-500 */
   --color-muted-3: #d1d5db; /* PRD neutral-600 softened for borders/scrollbars */

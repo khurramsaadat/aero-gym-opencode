@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Ruler, Scale } from "lucide-react";
+import { Scale } from "lucide-react";
 import type { BodyMeasurement } from "@/lib/types";
 import {
   STORAGE_KEYS,
@@ -57,7 +57,6 @@ const HEIGHT_MAX_CM = 220;
  * and emits `aero:measurements-changed` so the BMI card updates live.
  */
 export function MeasurementsPanel() {
-  const [date, setDate] = useState<string | null>(null);
   const dateRef = useRef<string | null>(null);
   const [weightKg, setWeightKg] = useState(0);
   const [heightCm, setHeightCmState] = useState(() => useSettings.getHeightCm());
@@ -81,8 +80,6 @@ export function MeasurementsPanel() {
   useEffect(() => {
     const today = formatDateKey(new Date());
     dateRef.current = today;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDate(today);
     refresh();
   }, [refresh]);
 
@@ -152,42 +149,48 @@ export function MeasurementsPanel() {
 
       {/* Weight + height rows with unit toggles */}
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <button
-          type="button"
-          onClick={() => setActive({ kind: "weight" })}
-          className="rounded-xl border border-card-border bg-background px-3 py-2.5 transition-colors hover:border-muted-3"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-2">Weight</span>
+        <div className="rounded-xl border border-card-border bg-background px-2.5 py-2.5 transition-colors hover:border-muted-3">
+          <button
+            type="button"
+            onClick={() => setActive({ kind: "weight" })}
+            className="text-[10px] font-bold uppercase tracking-widest text-muted-2"
+          >
+            Weight
+          </button>
+          <div className="mt-1 flex items-center justify-between gap-1">
+            <button
+              type="button"
+              onClick={() => setActive({ kind: "weight" })}
+              className="flex items-baseline gap-1 text-left"
+            >
+              <span className="text-lg font-bold text-foreground">
+                {weightDisplay !== null ? weightDisplay : "-"}
+              </span>
+            </button>
             <UnitToggle unit={weightUnit} onToggle={toggleWeightUnit} />
           </div>
-          <div className="mt-1 flex items-baseline gap-1">
-            <span className="text-lg font-bold text-foreground">
-              {weightDisplay !== null ? weightDisplay : "-"}
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-2">
-              {weightUnit === "kg" ? "kg" : "lbs"}
-            </span>
-          </div>
-        </button>
-        <button
-          type="button"
-          onClick={() => setActive({ kind: "height" })}
-          className="rounded-xl border border-card-border bg-background px-3 py-2.5 transition-colors hover:border-muted-3"
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-2">Height</span>
+        </div>
+        <div className="rounded-xl border border-card-border bg-background px-2.5 py-2.5 transition-colors hover:border-muted-3">
+          <button
+            type="button"
+            onClick={() => setActive({ kind: "height" })}
+            className="text-[10px] font-bold uppercase tracking-widest text-muted-2"
+          >
+            Height
+          </button>
+          <div className="mt-1 flex items-center justify-between gap-1">
+            <button
+              type="button"
+              onClick={() => setActive({ kind: "height" })}
+              className="flex items-baseline gap-1 text-left"
+            >
+              <span className="text-lg font-bold text-foreground">
+                {heightDisplay !== null ? heightDisplay : "-"}
+              </span>
+            </button>
             <UnitToggle unit={lengthUnit} onToggle={toggleLengthUnit} />
           </div>
-          <div className="mt-1 flex items-baseline gap-1">
-            <span className="text-lg font-bold text-foreground">
-              {heightDisplay !== null ? heightDisplay : "-"}
-            </span>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-2">
-              {lengthUnit === "cm" ? "cm" : "in"}
-            </span>
-          </div>
-        </button>
+        </div>
       </div>
 
       {/* 12 tape measurements */}
@@ -274,7 +277,7 @@ function UnitToggle({
       ? [["KG", "kg"], ["LBS", "lb"]]
       : [["CM", "cm"], ["IN", "in"]];
   return (
-    <div className="inline-flex rounded-lg border border-card-border bg-card p-px">
+    <div className="inline-flex shrink-0 rounded-lg border border-card-border bg-card p-px">
       {options.map(([label, value]) => {
         const on = unit === value;
         return (
@@ -283,8 +286,8 @@ function UnitToggle({
             type="button"
             onClick={onToggle}
             aria-pressed={on}
-            className={`rounded-[5px] px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
-              on ? "bg-accent text-accent-text" : "text-muted-2 hover:text-foreground"
+            className={`whitespace-nowrap rounded-[5px] px-1.5 py-1 text-[9px] font-bold uppercase tracking-wide transition-colors ${
+              on ? "bg-accent text-accent-contrast" : "text-muted-2 hover:text-foreground"
             }`}
           >
             {label}

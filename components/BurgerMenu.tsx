@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useYear } from "./YearProvider";
+import { SidebarWidgets } from "./SidebarWidgets";
 
 interface BurgerButtonProps {
   open: boolean;
@@ -80,11 +81,18 @@ export function BurgerMenu({ open, onClose, children }: BurgerMenuProps) {
       }}
     >
       <div className="fixed inset-0 bg-black/45 backdrop-blur-sm" aria-hidden />
-      <div className="ml-auto flex h-full w-full max-w-sm flex-col bg-background shadow-[1px_0_40px_rgba(0,0,0,0.5)]">
+      <div className="relative z-10 ml-auto flex h-full w-full max-w-sm flex-col bg-background shadow-[1px_0_40px_rgba(0,0,0,0.5)]">
         <div className="flex items-center justify-end px-4 pt-5">
           <BurgerButton open={open} onToggle={onClose} label={open ? "Close menu" : "Menu"} />
         </div>
-        <nav className="mt-2 flex-1 overflow-y-auto px-4">{children}</nav>
+        <nav className="mt-2 flex-1 overflow-y-auto px-4">
+          {children}
+          {open && (
+            <div className="mt-6 space-y-3 pb-4">
+              <SidebarWidgets />
+            </div>
+          )}
+        </nav>
         <footer className="mt-auto border-t border-card-border px-4 py-4 text-center text-[11px] text-muted">
           <p>
             {useYear()} Aero Gym by Khurram | All rights reserved.

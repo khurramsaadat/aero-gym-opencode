@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChartLine } from "lucide-react";
 import { LineChart, Line, XAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import type { BodyMeasurement } from "@/lib/types";
@@ -13,7 +13,6 @@ import {
 } from "@/lib/storage";
 import { MEASUREMENTS_CHANGED_EVENT } from "@/lib/events";
 import { formatDateKey, addDays } from "@/lib/dates";
-import { toDisplay, type WeightUnit } from "@/lib/unit";
 import { useWeightUnit } from "@/hooks/useUnit";
 
 /**
@@ -25,19 +24,17 @@ import { useWeightUnit } from "@/hooks/useUnit";
 export function BmiCard() {
   const { unit, toDisplay: weightToDisplay } = useWeightUnit();
   const [date, setDate] = useState<string | null>(null);
-  const dateRef = useRef<string | null>(null);
   const [weightLog, setWeightLog] = useState(() => useBodyWeight.get());
   const [measurements, setMeasurementsState] = useState<BodyMeasurement | null>(() => useMeasurements.latest());
   const [heightCm, setHeightCm] = useState(() => useSettings.getHeightCm());
 
   // Current weight: today's entry, falling back to the latest logged day.
   const currentKg = useMemo(() => {
-    const d = dateRef.current;
-    if (!d) return 0;
-    if (weightLog[d]) return weightLog[d];
+    if (!date) return 0;
+    if (weightLog[date]) return weightLog[date];
     const days = Object.keys(weightLog).sort();
     return days.length ? weightLog[days[days.length - 1]] : 0;
-  }, [weightLog]);
+  }, [date, weightLog]);
 
   const bmi = heightCm > 0 && currentKg > 0 ? currentKg / ((heightCm / 100) ** 2) : null;
 
@@ -58,16 +55,15 @@ export function BmiCard() {
   }, [measurements]);
 
   const trend = useMemo(() => {
-    const d = dateRef.current;
-    if (!d) return [];
+    if (!date) return [];
     return Array.from({ length: 7 }, (_, i) => {
-      const day = addDays(d, i - 6);
+      const day = addDays(date, i - 6);
       return {
         label: new Date(`${day}T00:00:00`).toLocaleDateString("en-US", { weekday: "short" }),
         kg: weightLog[day] ?? null,
       };
     });
-  }, [weightLog]);
+  }, [date, weightLog]);
 
   const refresh = useCallback(() => {
     setWeightLog(useBodyWeight.get());
@@ -77,7 +73,6 @@ export function BmiCard() {
 
   useEffect(() => {
     const today = formatDateKey(new Date());
-    dateRef.current = today;
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setDate(today);
     refresh();
@@ -175,8 +170,8 @@ export function BmiCard() {
                     borderRadius: 10,
                     padding: "8px 10px",
                   }}
-                  formatter={(value: number | null) =>
-                    value === null ? "-" : [weightToDisplay(value), "weight"]
+                  formatter={(value: unknown): [number, string] | string =>
+                    typeof value === "number" ? [weightToDisplay(value), "weight"] : "-"
                   }
                   labelFormatter={() => ""}
                 />

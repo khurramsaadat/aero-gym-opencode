@@ -51,34 +51,34 @@
 - [x] Workout duration timer + screen wake lock; rest timer (toggleable, persisted to `workout-rest-timer`)
 
 ### M3 - wger.de Integration & Exercise DB
-- [ ] Local exercise database (200+ exercises, categories/muscles/equipment) as a data module
-- [ ] wger client: `exerciseinfo`, `exerciseimage`, translations; 7-day `wger-exercise-cache`
-- [ ] Dual search: local 200+ + wger 600+, scoring-based matching + deduplication; brand-colored focus ring on the search bar
-- [ ] Equipment badges: user-saved priority over wger
-- [ ] Form guide: expandable tooltip with step-by-step wger instructions
-- [ ] Exercise ID overrides for correct images (e.g., Dumbbell Curl - 1192)
+- [x] Local exercise database (200+ exercises, categories/muscles/equipment) as a data module
+- [x] wger client: `exerciseinfo`, `exerciseimage`, translations; 7-day `wger-exercise-cache`
+- [x] Dual search: local 200+ + wger 600+, scoring-based matching + deduplication; brand-colored focus ring on the search bar
+- [x] Equipment badges: user-saved priority over wger
+- [x] Form guide: expandable tooltip with step-by-step wger instructions
+- [x] Exercise ID overrides for correct images (e.g., Dumbbell Curl - 1192)
 
 ### M4 - Burger Menu / Sidebar Widgets
-- [ ] Measurements: unit toggles (cm/in, kg/lb), tap-to-edit fields, 12 tape measurements, autosave per field
-- [ ] BMI & Body Composition: color-coded BMI scale, Navy-method body-fat estimate, 7-day trend; reacts to measurement changes via custom events
-- [ ] Templates: save / load / share / delete workout templates
-- [ ] Achievements: 8 unlockable badges
-- [ ] Muscle Balance Donut (Recharts PieChart, bold white in-slice labels)
-- [ ] Settings: rest timer toggle, sound effects toggle, haptic toggle, export/import with drag-and-drop, notifications, granular clear-data (workouts / body weight / measurements / favorites / all) with double-tap confirmation
-- [ ] About section
+- [x] Measurements: unit toggles (cm/in, kg/lb), tap-to-edit fields, 12 tape measurements, autosave per field
+- [x] BMI & Body Composition: color-coded BMI scale, Navy-method body-fat estimate, 7-day trend; reacts to measurement changes via custom events
+- [x] Templates: save / load / share / delete workout templates
+- [x] Achievements: 8 unlockable badges
+- [x] Muscle Balance Donut (Recharts PieChart, bold white in-slice labels)
+- [x] Settings: rest timer toggle, sound effects toggle, haptic toggle, export/import with drag-and-drop, notifications, granular clear-data (workouts / body weight / measurements / favorites / all) with double-tap confirmation
+- [x] About section
 
 ### M5 - Analytics View
-- [ ] Range toggle 7 / 14 / 30 days; stat cards (active days, total sets, avg/day)
-- [ ] Volume chart (Recharts BarChart)
-- [ ] Muscles Worked This Week: front/back split with per-muscle progress bars
-- [ ] Consistency insight (smart text feedback)
-- [ ] 90-day frequency heatmap
-- [ ] Volume by Muscle chart
-- [ ] Muscle Balance Donut + Achievements
+- [x] Range toggle 7 / 14 / 30 days; stat cards (active days, total sets, avg/day)
+- [x] Volume chart (Recharts BarChart)
+- [x] Muscles Worked This Week: front/back split with per-muscle progress bars
+- [x] Consistency insight (smart text feedback)
+- [x] 90-day frequency heatmap
+- [x] Volume by Muscle chart
+- [x] Muscle Balance Donut + Achievements
 
 ### M6 - Progress & History Views
-- [ ] Progress: Exercise Weight / Body Weight toggle; 7 Days / 4 Weeks / 3 Months; exercise selector + line chart + stat cards
-- [ ] History (renamed from Calendar, last tab): weekly strip with completion-% badges; monthly grid with completion % + muscle-group dots; Muscle Distribution Donut with Week/Month/All toggle
+- [x] Progress: Exercise Weight / Body Weight toggle; 7 Days / 4 Weeks / 3 Months; exercise selector + line chart + stat cards
+- [x] History (renamed from Calendar, last tab): weekly strip with completion-% badges; monthly grid with completion % + muscle-group dots; Muscle Distribution Donut with Week/Month/All toggle
 
 ### M7 - Weather Page
 - [ ] Open-Meteo (free, no key), geolocation with fallback; replaces modal

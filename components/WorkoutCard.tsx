@@ -18,7 +18,7 @@ import { getWgerIdOverride } from "@/lib/exercise-db";
 import { toDisplay, toKg, type WeightUnit } from "@/lib/unit";
 import { vibrate } from "@/lib/haptics";
 import { playSetComplete, playPrFanfare, playWorkoutComplete } from "@/lib/sounds";
-import { subscribeToStorage, useFavorites } from "@/lib/storage";
+import { STORAGE_KEYS, subscribeToStorage, useFavorites } from "@/lib/storage";
 import { notifyWorkoutComplete } from "@/lib/notifications";
 import { FormGuide } from "./FormGuide";
 import { Confetti } from "./Confetti";
@@ -26,7 +26,7 @@ import { Modal } from "./Modal";
 import { ExerciseSearch, type SearchSelectable } from "./ExerciseSearch";
 import {
   fetchWgerExercise,
-  getWgerImageUrl,
+  isUsableImageUrl,
   mapWgerEquipment,
   categoryForWgerMuscles,
 } from "@/lib/wger";
@@ -91,7 +91,7 @@ export function WorkoutCard({
   const isFav = favorites.some((f) => f.name === workout.name);
 
   useEffect(() => {
-    return subscribeToStorage("favorites-changed", () => setFavoritesState(useFavorites.get()));
+    return subscribeToStorage(STORAGE_KEYS.favorites, () => setFavoritesState(useFavorites.get()));
   }, []);
 
   // Local edit state (synced from props when the workout changes)
@@ -184,7 +184,7 @@ export function WorkoutCard({
         category: ex.data.category,
         equipment: ex.data.equipment ?? workout.equipment,
         exerciseId: id,
-        image: id ? getWgerImageUrl(id) : undefined,
+        image: undefined,
         muscles: ex.data.muscles,
         musclesSecondary: ex.data.musclesSecondary,
       });
@@ -219,7 +219,7 @@ export function WorkoutCard({
 
       {/* Header */}
       <div className="flex items-start gap-3 p-3">
-        {workout.image ? (
+        {isUsableImageUrl(workout.image) ? (
           <Image
             src={workout.image}
             alt={workout.name}
@@ -254,7 +254,7 @@ export function WorkoutCard({
           {/* Badges */}
           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
             {pr && (
-              <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-text">
+              <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-contrast">
                 PR
               </span>
             )}
@@ -278,7 +278,7 @@ export function WorkoutCard({
               onClick={() => onToggleFavorite(workout)}
               aria-label={isFav ? "Unpin from favorites" : "Pin to favorites"}
               className={`ml-auto rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                isFav ? "border-accent bg-accent text-accent-text" : "border-card-border text-muted-2 hover:border-muted-3"
+                isFav ? "border-accent bg-accent text-accent-contrast" : "border-card-border text-muted-2 hover:border-muted-3"
               }`}
             >
               {isFav ? (
@@ -364,7 +364,7 @@ export function WorkoutCard({
             <span className="text-xs text-muted-2">min</span>
             <button
               onClick={() => commit({ completedSets: workout.sets > 0 ? workout.completedSets : [0] })}
-              className="ml-auto rounded-full bg-accent px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-accent-text transition-colors hover:opacity-90"
+              className="ml-auto rounded-full bg-accent px-4 py-2 text-[11px] font-bold uppercase tracking-wider text-accent-contrast transition-colors hover:opacity-90"
             >
               Mark Complete
             </button>
@@ -472,7 +472,7 @@ export function WorkoutCard({
                           }}
                           className={`rounded-xl border px-3 py-2 text-center text-sm font-semibold transition-colors ${
                             selected
-                              ? "border-accent bg-accent text-accent-text"
+                              ? "border-accent bg-accent text-accent-contrast"
                               : "border-card-border bg-card text-muted-2 hover:border-muted-3 hover:text-foreground"
                           }`}
                         >
@@ -499,7 +499,7 @@ export function WorkoutCard({
                         aria-label={`${done ? "Undo" : "Complete"} set ${i + 1}`}
                         className={`flex h-11 w-11 items-center justify-center rounded-full text-sm font-bold transition-all duration-200 ${
                           done
-                            ? "bg-accent text-accent-text shadow-[0_0_12px_rgba(201,162,39,0.5)]"
+                            ? "bg-accent text-accent-contrast shadow-[0_0_12px_rgba(201,162,39,0.5)]"
                             : "bg-background border border-card-border text-muted-2 hover:scale-105 hover:border-muted-3 hover:text-foreground"
                         }`}
                       >
@@ -518,7 +518,7 @@ export function WorkoutCard({
                               if (e.key === "Escape") setRepsEditing(null);
                             }}
                             onBlur={() => saveRepsForSet(i, repsInput)}
-                            className="h-6 w-10 rounded bg-accent px-1 text-center text-[10px] font-bold text-accent-text focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            className="h-6 w-10 rounded bg-accent px-1 text-center text-[10px] font-bold text-accent-contrast focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                           />
                           <button onClick={() => setRepsEditing(null)} className="text-muted-2">
                             <X className="h-3.5 w-3.5" />

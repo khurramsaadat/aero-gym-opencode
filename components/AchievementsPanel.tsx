@@ -12,7 +12,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { Workout, WorkoutLog } from "@/lib/types";
+import type { WorkoutLog } from "@/lib/types";
 import { STORAGE_KEYS, subscribeToStorage, useWorkoutLogs } from "@/lib/storage";
 import { addDays } from "@/lib/dates";
 
@@ -141,7 +141,7 @@ export function AchievementsPanel() {
             >
               <div
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-                  isEarned ? "bg-accent text-accent-text" : "bg-card-border text-muted-2"
+                  isEarned ? "bg-accent text-accent-contrast" : "bg-card-border text-muted-2"
                 }`}
               >
                 <a.icon className="h-4.5 w-4.5" aria-hidden />

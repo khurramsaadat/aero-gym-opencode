@@ -7,8 +7,8 @@ import { useWorkoutLogs, subscribeToStorage, useFavorites } from "@/lib/storage"
 import { formatDateKey, addDays, isSameDay } from "@/lib/dates";
 import { getWgerIdOverride } from "@/lib/exercise-db";
 import {
-  getWgerImageUrl,
   fetchWgerExercise,
+  isUsableImageUrl,
   mapWgerEquipment,
 } from "@/lib/wger";
 import { getDailyQuote } from "@/lib/quotes";
@@ -27,6 +27,7 @@ import { UndoToast } from "./UndoToast";
 
 interface WorkoutsViewProps {
   onOpenWeather: () => void;
+  requestedDate?: string | null;
 }
 
 const WEEKLY_GOAL = 4;
@@ -44,7 +45,7 @@ function makeId(): string {
  * rejects `new Date()` during prerender of static routes, so no date
  * may be read at module or first-render time.
  */
-export function WorkoutsView({ onOpenWeather }: WorkoutsViewProps) {
+export function WorkoutsView({ onOpenWeather, requestedDate }: WorkoutsViewProps) {
   const [date, setDate] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -52,11 +53,12 @@ export function WorkoutsView({ onOpenWeather }: WorkoutsViewProps) {
   const [logs, setLogs] = useState<WorkoutLog>(() => useWorkoutLogs.get());
   const { unit, setUnit } = useWeightUnit();
 
-  // Mount-effect date init (SSR-safe: see note above).
+  // Mount-effect date init (SSR-safe: see note above). A History day
+  // selection arrives via `requestedDate`.
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setDate(formatDateKey(new Date()));
-  }, []);
+    setDate(requestedDate ?? formatDateKey(new Date()));
+  }, [requestedDate]);
 
   // Re-read logs when any component writes to storage.
   useEffect(() => {
@@ -209,35 +211,33 @@ export function WorkoutsView({ onOpenWeather }: WorkoutsViewProps) {
     persist(copied);
   }, [date, logs, persist]);
 
-  // Backfill wger metadata for logged workouts: correct images via the
-  // verified ID overrides, and muscles/equipment from the wger cache
-  // for exercises that were resolved online (M3).
+  // Backfill wger metadata for logged workouts: real images (never the
+  // JSON API endpoint), muscles and equipment via the verified ID
+  // overrides and the 7-day wger cache (M3).
   useEffect(() => {
     if (!date) return;
-    const missing = dayWorkouts.filter(
-      (w) => (!w.image && getWgerIdOverride(w.name)) || (w.exerciseId && !w.muscles?.length),
-    );
+    const missing = dayWorkouts.filter((w) => {
+      const id = w.exerciseId ?? getWgerIdOverride(w.name);
+      return !!id && (!isUsableImageUrl(w.image) || !w.muscles?.length || !w.musclesSecondary?.length);
+    });
     if (missing.length === 0) return;
     let cancelled = false;
     (async () => {
       const patches: Array<{ id: string; patch: Partial<Workout> }> = [];
       for (const w of missing) {
         if (cancelled) return;
+        const wgerId = w.exerciseId ?? getWgerIdOverride(w.name);
+        if (!wgerId) continue;
         const patch: Partial<Workout> = {};
-        if (!w.image) {
-          const id = getWgerIdOverride(w.name);
-          if (id) {
-            patch.image = getWgerImageUrl(id);
-            patch.exerciseId = id;
-          }
-        }
-        if (w.exerciseId && !w.muscles?.length) {
-          const data = await fetchWgerExercise(w.exerciseId);
-          if (data) {
-            patch.muscles = data.muscles;
+        if (!w.exerciseId) patch.exerciseId = wgerId;
+        const data = await fetchWgerExercise(wgerId);
+        if (data) {
+          if (!isUsableImageUrl(w.image) && isUsableImageUrl(data.image)) patch.image = data.image;
+          if (!w.muscles?.length && data.muscles.length) patch.muscles = data.muscles;
+          if (!w.musclesSecondary?.length && data.musclesSecondary.length) {
             patch.musclesSecondary = data.musclesSecondary;
-            if (!w.equipment && data.equipment[0]) patch.equipment = mapWgerEquipment(data.equipment[0]);
           }
+          if (!w.equipment && data.equipment[0]) patch.equipment = mapWgerEquipment(data.equipment[0]);
         }
         if (Object.keys(patch).length > 0) patches.push({ id: w.id, patch });
       }
@@ -376,7 +376,7 @@ export function WorkoutsView({ onOpenWeather }: WorkoutsViewProps) {
       <button
         onClick={() => setAddOpen(true)}
         aria-label="Add exercise"
-        className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-text shadow-[0_6px_20px_rgba(0,0,0,0.35)] transition-transform hover:scale-110 xl:right-8 xl:bottom-8"
+        className="fixed bottom-24 right-4 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-accent-contrast shadow-[0_6px_20px_rgba(0,0,0,0.35)] transition-transform hover:scale-110 lg:right-8 lg:bottom-8"
       >
         <Plus className="h-7 w-7" />
       </button>

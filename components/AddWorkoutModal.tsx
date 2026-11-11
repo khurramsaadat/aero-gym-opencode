@@ -9,7 +9,7 @@ import type { WgerExercise, WgerSearchHit } from "@/lib/types";
 import {
   categoryForWgerMuscles,
   fetchWgerExercise,
-  getWgerImageUrl,
+  isUsableImageUrl,
   mapWgerEquipment,
 } from "@/lib/wger";
 import { Modal } from "./Modal";
@@ -79,11 +79,10 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
 
   const handleSelect = (ex: SearchSelectable) => {
     if (ex.kind === "local") {
-      const override = getWgerIdOverride(ex.data.name);
       setSelected({
         kind: "local",
         data: ex.data,
-        image: override ? getWgerImageUrl(override) : undefined,
+        image: undefined,
       });
     } else {
       // Resolve wger details (muscles, equipment, instructions, image).
@@ -113,12 +112,13 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
     };
   }, [selected]);
 
-  const preview =
+  const rawPreview =
     selected?.kind === "local"
       ? selected.image
       : selected?.kind === "wger"
         ? selected.data?.image
         : undefined;
+  const preview = isUsableImageUrl(rawPreview) ? rawPreview : undefined;
 
   const category: WorkoutCategory | "" =
     selected?.kind === "local"
@@ -140,7 +140,7 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
         duration,
         equipment,
         exerciseId: getWgerIdOverride(d.name),
-        image: selected.image,
+        image: isUsableImageUrl(selected.image) ? selected.image : undefined,
         muscles: d.muscles,
         musclesSecondary: d.musclesSecondary,
       });
@@ -157,7 +157,7 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
         duration: isCardio ? duration || 30 : duration,
         equipment,
         exerciseId: d.id,
-        image: d.image,
+        image: isUsableImageUrl(d.image) ? d.image : undefined,
         muscles: d.muscles,
         musclesSecondary: d.musclesSecondary,
       });
@@ -224,7 +224,7 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
                     onClick={() => setEquipment(on ? undefined : eq)}
                     className={`rounded-xl border px-3 py-2 text-center text-sm font-semibold transition-colors ${
                       on
-                        ? "border-accent bg-accent text-accent-text"
+                        ? "border-accent bg-accent text-accent-contrast"
                         : "border-card-border bg-card text-muted-2 hover:border-muted-3 hover:text-foreground"
                     }`}
                   >
@@ -287,7 +287,7 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
           <button
             onClick={handleAdd}
             disabled={selected.kind === "wger" && !selected.data}
-            className="mt-2 w-full rounded-full bg-accent px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-accent-text transition-colors hover:opacity-90 disabled:cursor-wait disabled:opacity-50"
+            className="mt-2 w-full rounded-full bg-accent px-4 py-2.5 text-sm font-bold uppercase tracking-wider text-accent-contrast transition-colors hover:opacity-90 disabled:cursor-wait disabled:opacity-50"
           >
             Add exercise
           </button>
