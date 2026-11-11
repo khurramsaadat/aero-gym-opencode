@@ -1,5 +1,7 @@
 // Aero Gym - 50 daily motivational quotes (PRD §4.2), cycled by day of year.
 
+import { getDayOfYear } from "./dates";
+
 export const DAILY_QUOTES: string[] = [
   "The only bad workout is the one that didn't happen.",
   "Strength doesn't come from what you can do. It comes from overcoming what you once thought you couldn't.",
@@ -54,6 +56,5 @@ export const DAILY_QUOTES: string[] = [
 ];
 
 export function getDailyQuote(): string {
-  const dayIndex = new Date().getDay();
-  return DAILY_QUOTES[dayIndex % DAILY_QUOTES.length];
+  return DAILY_QUOTES[getDayOfYear(new Date()) % DAILY_QUOTES.length];
 }

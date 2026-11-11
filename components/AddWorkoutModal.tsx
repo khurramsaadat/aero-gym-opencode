@@ -84,6 +84,13 @@ export function AddWorkoutModal({ open, onClose, onAdd }: AddWorkoutModalProps) 
         data: ex.data,
         image: undefined,
       });
+      // Apply the database defaults, otherwise every pick starts at a
+      // generic 3 x 10 and cardio exercises are saved with 0 minutes.
+      setEquipment(ex.data.equipment);
+      setSets(ex.data.sets);
+      setReps(ex.data.reps);
+      setWeight(ex.data.weight);
+      setDuration(ex.data.duration);
     } else {
       // Resolve wger details (muscles, equipment, instructions, image).
       setSelected({ kind: "wger", hit: ex.data, data: null });

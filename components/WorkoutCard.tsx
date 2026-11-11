@@ -19,6 +19,7 @@ import { toDisplay, toKg, type WeightUnit } from "@/lib/unit";
 import { vibrate } from "@/lib/haptics";
 import { playSetComplete, playPrFanfare, playWorkoutComplete } from "@/lib/sounds";
 import { STORAGE_KEYS, subscribeToStorage, useFavorites } from "@/lib/storage";
+import { shareText } from "@/lib/share";
 import { notifyWorkoutComplete } from "@/lib/notifications";
 import { FormGuide } from "./FormGuide";
 import { Confetti } from "./Confetti";
@@ -327,13 +328,9 @@ export function WorkoutCard({
             {!editMode && (
               <button
                 onClick={() => {
-                  if (navigator.share) {
-                    navigator
-                      .share({ text: `${workout.name} - ${workout.sets} sets x ${repsForSet(workout, 0)} reps` })
-                      .catch(() => {});
-                  } else {
-                    onToggleFavorite(workout);
-                  }
+                  void shareText(
+                    `${workout.name} - ${workout.sets} sets x ${repsForSet(workout, 0)} reps`,
+                  );
                 }}
                 aria-label="Share"
                 className="rounded-full border border-card-border bg-background px-2 py-0.5 text-muted-2 hover:border-muted-3"

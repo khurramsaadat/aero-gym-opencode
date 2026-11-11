@@ -1,7 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { formatDateKey, addDays } from "@/lib/dates";
+import { formatDateKey, addDays, parseDateKey } from "@/lib/dates";
 
 interface DateHeaderProps {
   date: string;
@@ -15,7 +15,7 @@ interface DateHeaderProps {
  * and a completion progress ring on the right.
  */
 export function DateHeader({ date, onChange, workoutsCount = 0, goal = 1 }: DateHeaderProps) {
-  const d = new Date(date);
+  const d = parseDateKey(date);
   const label = d.toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",

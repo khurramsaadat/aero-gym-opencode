@@ -201,7 +201,13 @@ export function TemplatesPanel() {
         </Modal>
       )}
 
-      {undoTarget && <UndoToast onUndo={handleUndoDelete} label={`${undoTarget.name} deleted`} />}
+      {undoTarget && (
+        <UndoToast
+          onUndo={handleUndoDelete}
+          onDismiss={() => setUndoTarget(null)}
+          label={`${undoTarget.name} deleted`}
+        />
+      )}
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </section>
   );

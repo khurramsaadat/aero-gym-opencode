@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Copy, CheckCircle } from "lucide-react";
 import type { Workout, WorkoutLog, FavoriteExercise } from "@/lib/types";
 import { useWorkoutLogs, subscribeToStorage, useFavorites } from "@/lib/storage";
-import { formatDateKey, addDays, isSameDay } from "@/lib/dates";
+import { formatDateKey, addDays, isSameDay, parseDateKey } from "@/lib/dates";
 import { getWgerIdOverride } from "@/lib/exercise-db";
 import {
   fetchWgerExercise,
@@ -80,7 +80,7 @@ export function WorkoutsView({ onOpenWeather, requestedDate }: WorkoutsViewProps
 
   const completedThisWeek = useMemo(() => {
     if (!date) return 0;
-    const weekStart = addDays(date, -new Date(date).getDay());
+    const weekStart = addDays(date, -parseDateKey(date).getDay());
     let count = 0;
     let cursor = weekStart;
     while (!isSameDay(cursor, addDays(date, 1))) {
@@ -383,7 +383,7 @@ export function WorkoutsView({ onOpenWeather, requestedDate }: WorkoutsViewProps
 
       <AddWorkoutModal open={addOpen} onClose={() => setAddOpen(false)} onAdd={addWorkout} />
 
-      {pendingUndo && <UndoToast onUndo={undoDelete} />}
+      {pendingUndo && <UndoToast onUndo={undoDelete} onDismiss={() => setPendingUndo(null)} />}
     </div>
   );
 }
