@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldGrad3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFEAA7" />
+      <stop offset="50%" stop-color="#D4AF37" />
+      <stop offset="100%" stop-color="#966F1E" />
+    </linearGradient>
+  </defs>
+
+  <!-- Circular Dark Badge Base -->
+  <circle cx="256" cy="256" r="240" fill="#0B0E14" />
+
+  <!-- Bold Minimalist Aero 'A' Wing -->
+  <path d="M 256 90 
+           C 270 90, 390 340, 410 390 
+           C 360 390, 300 350, 256 300 
+           C 212 350, 152 390, 102 390 
+           C 122 340, 242 90, 256 90 Z 
+           M 256 200 L 200 310 C 230 290, 282 290, 312 310 Z" fill="url(#goldGrad3)" />
+</svg>
