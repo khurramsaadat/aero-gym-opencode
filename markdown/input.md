@@ -34,3 +34,20 @@
 > please check and fix all errors in the terminal tab, this is a RULE.
 > please can you go ahead and complete the milestones M5 and M6 stagewise and then test all pages and all button with playwright
 
+## 2026-11-11 - M7, M8, M9 completion
+
+> Milestone M7 M8 M9 please complete it and test all pages and button and link with playwright and fix if found any issue.
+
+## 2026-11-11 - Push request
+
+> please push all code to my repo
+
+## 2026-11-11 - Plan update
+
+> please update the plan.md
+
+## 2026-11-11 - Continue fixes and remaining PRD work
+
+> please continue to do the fixes.
+> also implement all the remaining in PRD and Plan.md then test everything with playwright and then push all code to my repo
+

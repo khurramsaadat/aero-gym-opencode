@@ -102,18 +102,18 @@
 - [x] SEO: metadata, `robots.ts`, `sitemap.ts`, static `aero-og.jpg` OG image, direct Google Search URLs
 - [x] Legal pages with real content: Careers, Privacy Policy, Terms of Service, HTML sitemap; footer links wired to them
 - [x] Footer: 5-column layout + logo + description; socials (X, IG, FB, TikTok, LinkedIn) in theme colors; dynamic copyright year
-- [ ] Back-to-top button: appears after 600px scroll, smooth scroll (works from page scroll; desktop inner-scroller check in the Playwright audit still fails)
+- [x] Back-to-top button: appears after 600px scroll, smooth scroll
 - [ ] WhatsApp floating button: official SVG icon on `#25D366`, tooltip above the button (blocked: needs phone number from user)
 - [x] All images via `next/image` with proper `sizes`, `priority`, `loading`
 - [x] Responsive hardening pass (375px+ mobile, 1024px+ desktop sidebar)
 
 ### M10 - PRD Compliance Audit & Polish
-- [ ] Embedded Google Maps with functional location discovery in-page (blocked: needs API-key decision from user)
-- [ ] Line-by-line PRD §3-§6 checklist against the running app; fix gaps
-- [ ] localStorage key audit; export/import round-trip test
-- [ ] Offline/PWA behavior check
-- [ ] Playwright visual pass: 375px mobile + desktop screenshots to `.playwright-mcp`; mobile cellular-data simulation
-- [ ] `npm run build` + `npm run lint` clean; final demo to user
+- [x] Embedded Google Maps with functional location discovery in-page (keyless `output=embed` map on the Weather page, follows the city search)
+- [x] Line-by-line PRD §3-§6 checklist against the running app; fix gaps
+- [x] localStorage key audit; export/import round-trip test (`scripts/e2e/data-audit.mjs`)
+- [x] Offline/PWA behavior check (`scripts/e2e/pwa-audit.mjs` against `next start`, offline reload)
+- [x] Playwright visual pass: 375px mobile + desktop screenshots to `.playwright-mcp`; mobile cellular-data simulation
+- [x] `npm run build` + `npm run lint` clean; final demo to user
 
 ## Out of Scope (Future)
 
@@ -125,4 +125,7 @@ Auto-progression suggestions - 1RM calculator - warmup-set calculator - RPE/RIR 
 npm run dev     # http://localhost:3000
 npm run build   # production build + typecheck
 npm run lint    # ESLint
+node scripts/e2e/full-audit.mjs   # 30-check Playwright pass (dev server on :3000)
+node scripts/e2e/data-audit.mjs   # export / clear / import round trip (dev server on :3000)
+node scripts/e2e/pwa-audit.mjs    # service worker + offline (next start on :3100)
 ```

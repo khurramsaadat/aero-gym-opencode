@@ -187,6 +187,8 @@ await check("mobile: delete with undo restores the exercise", async () => {
     throw new Error("exercise still present after delete");
   }
   await mobile.locator('button[aria-label="Undo"]').click();
+  // Undo restores while edit mode is still on, where the name is an input.
+  await mobile.locator('main button:text-is("Done")').click({ timeout: 8000 }).catch(() => {});
   await mobile.locator("h3", { hasText: "Bench Press" }).first().waitFor({ timeout: 8000 });
 });
 
@@ -246,8 +248,14 @@ await check("mobile: bottom nav reaches analytics, progress and history", async 
 await check("mobile: weather page loads forecast, air quality and hourly strip", async () => {
   await menuGoto(mobile, "Weather");
   await mobile.locator("text=7-day forecast").waitFor({ timeout: 45000 });
-  await mobile.locator("text=Air quality").waitFor({ timeout: 20000 });
+  await mobile.getByRole("heading", { name: "Air quality" }).first().waitFor({ timeout: 20000 });
   await mobile.locator("text=Next 48 hours").waitFor({ timeout: 20000 });
+  const map = mobile.locator('iframe[title^="Map of"]');
+  await map.waitFor({ timeout: 20000 });
+  const mapSrc = await map.getAttribute("src");
+  if (!mapSrc || !mapSrc.includes("google.com/maps") || !mapSrc.includes("output=embed")) {
+    throw new Error(`unexpected map src: ${mapSrc}`);
+  }
   await shot(mobile, "mobile-weather");
 });
 
@@ -369,8 +377,8 @@ await check("desktop: theme toggle in the sidebar", async () => {
 });
 
 await check("desktop: back to top works inside the scroll container", async () => {
-  await desktop.goto(BASE, { waitUntil: "networkidle" });
-  await desktop.locator('button[aria-label="Add exercise"]').waitFor({ state: "visible", timeout: 20000 });
+  await desktop.goto(`${BASE}/?tab=weather`, { waitUntil: "networkidle" });
+  await desktop.locator("text=7-day forecast").waitFor({ timeout: 45000 });
   await scrollToBottom(desktop);
   await desktop.waitForFunction(
     () => {

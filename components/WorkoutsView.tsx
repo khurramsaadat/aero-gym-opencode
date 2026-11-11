@@ -128,7 +128,8 @@ export function WorkoutsView({ onOpenWeather, requestedDate }: WorkoutsViewProps
       const removed = dayWorkouts.find((w) => w.id === id);
       if (!removed) return;
       persist(dayWorkouts.filter((w) => w.id !== id));
-      setPendingUndo({ date, workouts: dayWorkouts.filter((w) => w.id !== id) });
+      // Undo must restore the list as it was before the delete.
+      setPendingUndo({ date, workouts: dayWorkouts });
     },
     [date, dayWorkouts, persist],
   );

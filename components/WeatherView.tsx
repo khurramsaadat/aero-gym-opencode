@@ -439,6 +439,34 @@ export function WeatherView() {
             />
           </section>
 
+          {/* Location map: keyless Google Maps embed that follows the city search */}
+          {location && (
+            <section className="overflow-hidden rounded-2xl border border-card-border bg-card">
+              <iframe
+                title={`Map of ${locationLabel(location)}`}
+                src={`https://www.google.com/maps?q=${location.latitude},${location.longitude}&z=12&output=embed`}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+                className="h-56 w-full border-0"
+              />
+              <div className="flex flex-wrap items-center justify-between gap-2 border-t border-card-border px-3 py-2">
+                <span className="flex items-center gap-1.5 text-[11px] font-semibold text-muted">
+                  <MapPin className="h-3.5 w-3.5 text-accent" aria-hidden />
+                  {locationLabel(location)}
+                </span>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-[11px] font-bold uppercase tracking-wider text-accent-text underline decoration-accent/40 underline-offset-2 transition-opacity hover:opacity-80"
+                >
+                  Open in Google Maps
+                </a>
+              </div>
+            </section>
+          )}
+
           {/* Air quality */}
           <AirQualitySection air={data.air} />
 

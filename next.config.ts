@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // The dev badge sits over the mobile theme toggle at the bottom-left.
+  devIndicators: false,
   /* config options here
      cacheComponents/partialPrefetching intentionally off: this app renders
      per-request (force-dynamic) because every view derives from "today". */
