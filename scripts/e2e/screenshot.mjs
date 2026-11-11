@@ -18,13 +18,6 @@ function nextName(label) {
   return join(OUT_DIR, `${String(counter).padStart(2, "0")}-${label}.png`);
 }
 
-const slow4G = {
-  offline: false,
-  downloadThroughput: 500 * 1024,
-  uploadThroughput: 500 * 1024,
-  latency: 150,
-};
-
 const browser = await chromium.launch();
 
 // ---------- mobile: 375x812, slow 4G ----------

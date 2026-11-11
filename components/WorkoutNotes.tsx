@@ -19,6 +19,8 @@ export function WorkoutNotes({ date, className }: WorkoutNotesProps) {
   const [meta, setMeta] = useState(() => useDayMeta.getForDay(date));
 
   useEffect(() => {
+    // Re-read when the viewed day changes (mount read stays SSR-safe).
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMeta(useDayMeta.getForDay(date));
   }, [date]);
 

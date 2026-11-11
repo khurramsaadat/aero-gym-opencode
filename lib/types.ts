@@ -23,6 +23,7 @@ export type Equipment =
   | "Cable"
   | "Bodyweight"
   | "Band"
+  | "Plate"
   | "Other";
 
 export type SetType = "normal" | "warmup" | "drop" | "failure";

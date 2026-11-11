@@ -31,24 +31,24 @@
 - [x] `types.ts` (Workout, WorkoutLog, BodyWeightLog, BodyMeasurement, MeasurementLog, DayMetaLog, WorkoutTemplate, FavoriteExercise per PRD §6)
 - [x] Typed `storage.ts` layer (get/set/subscribe, PRD keys)
 - [x] Responsive shell: mobile-first 375px+, desktop sidebar 1024px+, bottom nav (mobile), animated burger menu container (middle line disappears first, then top/bottom rotate to cross, no position shift)
-- [ ] Mobile menu: center-aligned links, staggered fade-in-up; copyright at bottom under thin line
-- [ ] View shell: tab switching between Workouts / Analytics / Progress / History / Coaches / Weather with tab persistence
+- [x] Mobile menu: center-aligned links, staggered fade-in-up; copyright at bottom under thin line
+- [x] View shell: tab switching between Workouts / Analytics / Progress / History / Coaches / Weather with tab persistence
 
 ### M2 - Daily Log (Workouts tab)
-- [ ] Date header: app logo (mobile), centered date, burger menu; date navigation; progress ring
-- [ ] Motivational banner (daily rotating Unsplash photo, desktop only)
-- [ ] Streak banner: consecutive-day streak + weekly goal (4 days) progress bar + share button; 50 rotating daily quotes
-- [ ] Summary pills: Exercises / Sets Done / Weather - each opens detail modal (Weather pill goes to the Weather page, PRD §4.4)
-- [ ] Quick-add Favorites Bar: pin <=10 exercises, wrapping pill rows, gold "Added!" flash, Edit/Done delete mode, icon-less compact layout, persisted
-- [ ] Workout cards: 80x80 wger images, PR / superset / drop / equipment badges, form-guide tooltip, compact layout
-- [ ] Set tracker: tappable bubbles, confetti on completion, haptic feedback, per-set reps labels (tap to edit, gold highlight when different from default)
-- [ ] Cardio "Mark Complete" button
-- [ ] Edit mode: inline edit, equipment selector (8 options), set-type toggle, exercise swap, reorder, delete + undo toast, star pin/unpin to favorites from card
-- [ ] Session notes: expandable 5-star rating + text notes
-- [ ] "Copy previous workout" one-tap when day empty
-- [ ] Add Exercise FAB - 2-step modal (wger preview image, equipment selector)
-- [ ] KG/LBS toggle inline at weight input; auto-converts all existing data
-- [ ] Workout duration timer + screen wake lock; rest timer (toggleable)
+- [x] Date header: app logo (mobile), centered date, burger menu; date navigation; progress ring
+- [x] Motivational banner (daily rotating Unsplash photo, desktop only)
+- [x] Streak banner: consecutive-day streak + weekly goal (4 days) progress bar + share button; 50 rotating daily quotes
+- [x] Summary pills: Exercises / Sets Done / Weather - each opens detail modal (Weather pill goes to the Weather page, PRD §4.4)
+- [x] Quick-add Favorites Bar: pin <=10 exercises, wrapping pill rows, gold "Added!" flash, Edit/Done delete mode, icon-less compact layout, persisted
+- [x] Workout cards: PR / superset / drop / equipment badges, compact layout (wger 80x80 images + form-guide tooltip land with M3)
+- [x] Set tracker: tappable bubbles, confetti on completion, haptic feedback, per-set reps labels (tap to edit, gold highlight when different from default)
+- [x] Cardio "Mark Complete" button
+- [x] Edit mode: inline edit, equipment selector (8 options), set-type toggle, exercise swap, reorder, delete + undo toast, star pin/unpin to favorites from card
+- [x] Session notes: expandable 5-star rating + text notes
+- [x] "Copy previous workout" one-tap when day empty
+- [x] Add Exercise FAB - 2-step modal with equipment selector (wger preview image lands with M3)
+- [x] KG/LBS toggle inline at weight input; auto-converts all existing data (stored in KG, display-only conversion)
+- [x] Workout duration timer + screen wake lock; rest timer (toggleable, persisted to `workout-rest-timer`)
 
 ### M3 - wger.de Integration & Exercise DB
 - [ ] Local exercise database (200+ exercises, categories/muscles/equipment) as a data module

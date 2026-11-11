@@ -61,6 +61,9 @@ export default function Home() {
   useEffect(() => {
     const saved = useSettings.getActiveTab();
     if (saved && (TABS as readonly { id: TabId }[]).some((t) => t.id === saved)) {
+      // SSR-safe: restoring after mount keeps server HTML (always
+      // "workouts") from mismatching the first client render.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActiveTabState(saved as TabId);
     }
   }, []);

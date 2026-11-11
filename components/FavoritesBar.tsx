@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Star, X, Check } from "lucide-react";
-import { subscribeToStorage, useFavorites, type FavoriteExercise } from "@/lib/storage";
+import { subscribeToStorage, useFavorites } from "@/lib/storage";
+import type { FavoriteExercise } from "@/lib/types";
 
 interface FavoritesBarProps {
   onAdd: (exercise: FavoriteExercise) => void;

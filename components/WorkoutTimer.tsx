@@ -11,6 +11,7 @@ import { vibrate } from "@/lib/haptics";
 export function WorkoutTimer() {
   const [running, setRunning] = useState(false);
   const [seconds, setSeconds] = useState(0);
+  const [wakeLocked, setWakeLocked] = useState(false);
   const tickRef = useRef(0);
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
 
@@ -38,7 +39,9 @@ export function WorkoutTimer() {
           wakeLockRef.current = await navigator.wakeLock.request("screen");
           wakeLockRef.current.addEventListener("release", () => {
             wakeLockRef.current = null;
+            setWakeLocked(false);
           });
+          setWakeLocked(true);
         }
       } catch {
         /* wake lock denied - ignore */
@@ -65,8 +68,6 @@ export function WorkoutTimer() {
     setSeconds(0);
   };
 
-  const wakeLocked = wakeLockRef.current !== null;
-
   return (
     <div className="flex items-center gap-2 rounded-2xl border border-card-border bg-card px-4 py-2.5">
       <button onClick={toggle} aria-label={running ? "Pause timer" : "Start timer"} className="rounded-full p-1.5 text-muted-2 transition-colors hover:bg-card-border hover:text-foreground">
@@ -79,7 +80,9 @@ export function WorkoutTimer() {
         <RotateCcw className="h-4.5 w-4.5" />
       </button>
       {wakeLocked && (
-        <Unlock className="h-4 w-4 text-accent" title="Screen wake lock active" />
+        <span title="Screen wake lock active" aria-hidden>
+          <Unlock className="h-4 w-4 text-accent" />
+        </span>
       )}
     </div>
   );

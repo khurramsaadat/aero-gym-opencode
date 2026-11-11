@@ -13,8 +13,8 @@ import {
   X,
   Share2,
 } from "lucide-react";
-import type { Workout, SetType, Equipment, FavoriteExercise, WeightUnit } from "@/lib/types";
-import { toDisplay, toKg } from "@/lib/unit";
+import type { Workout, SetType, Equipment } from "@/lib/types";
+import { toDisplay, toKg, type WeightUnit } from "@/lib/unit";
 import { vibrate } from "@/lib/haptics";
 import { playSetComplete, playPrFanfare, playWorkoutComplete } from "@/lib/sounds";
 import { subscribeToStorage, useFavorites } from "@/lib/storage";
@@ -99,7 +99,9 @@ export function WorkoutCard({
   const [confettiKey, setConfettiKey] = useState(0);
   const prRef = useRef(false);
 
+  // Prop -> local state sync for the edit form (legit sync pattern).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(workout.name);
     setWeightDisplay(toDisplay(workout.weight, unit));
     setReps(workout.reps);
@@ -261,6 +263,22 @@ export function WorkoutCard({
             </button>
             {editMode && (
               <>
+                <span className="flex items-center gap-1">
+                  <button
+                    onClick={() => onMove("up")}
+                    aria-label="Move workout up"
+                    className="rounded-full border border-card-border bg-background p-0.5 text-muted-2 transition-colors hover:border-muted-3 hover:text-foreground"
+                  >
+                    <ChevronUp className="h-3 w-3" />
+                  </button>
+                  <button
+                    onClick={() => onMove("down")}
+                    aria-label="Move workout down"
+                    className="rounded-full border border-card-border bg-background p-0.5 text-muted-2 transition-colors hover:border-muted-3 hover:text-foreground"
+                  >
+                    <ChevronDown className="h-3 w-3" />
+                  </button>
+                </span>
                 <button onClick={() => setSwapOpen(true)} className="rounded-full border border-card-border bg-background px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-2 hover:border-muted-3">
                   Swap
                 </button>

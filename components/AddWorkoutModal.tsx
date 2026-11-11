@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { LocalExercise, Equipment } from "@/lib/exercise-db";
+import type { LocalExercise } from "@/lib/exercise-db";
+import type { Equipment } from "@/lib/types";
 import { Modal } from "./Modal";
 import { ExerciseSearch } from "./ExerciseSearch";
 

@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Plus, Copy, CheckCircle } from "lucide-react";
-import type { Workout, FavoriteExercise } from "@/lib/types";
+import type { Workout, WorkoutLog, FavoriteExercise } from "@/lib/types";
 import { useWorkoutLogs, subscribeToStorage, useFavorites } from "@/lib/storage";
 import { formatDateKey, addDays, isSameDay } from "@/lib/dates";
 import { getDailyQuote } from "@/lib/quotes";
@@ -42,21 +42,20 @@ export function WorkoutsView({ onOpenWeather }: WorkoutsViewProps) {
   const [date, setDate] = useState<string | null>(null);
   const [editMode, setEditMode] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
-  const [version, setVersion] = useState(0);
   const [pendingUndo, setPendingUndo] = useState<{ date: string; workouts: Workout[] } | null>(null);
-  const { unit, setUnit, toDisplay } = useWeightUnit();
+  const [logs, setLogs] = useState<WorkoutLog>(() => useWorkoutLogs.get());
+  const { unit, setUnit } = useWeightUnit();
 
-  // Mount-effect date init (see note above).
+  // Mount-effect date init (SSR-safe: see note above).
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDate(formatDateKey(new Date()));
   }, []);
 
   // Re-read logs when any component writes to storage.
   useEffect(() => {
-    return subscribeToStorage("myWorkoutLogs", () => setVersion((v) => v + 1));
+    return subscribeToStorage("myWorkoutLogs", () => setLogs(useWorkoutLogs.get()));
   }, []);
-
-  const logs = useMemo(() => useWorkoutLogs.get(), [version]);
   const dayWorkouts = useMemo(() => (date ? logs[date] ?? [] : []), [logs, date]);
   const quote = useMemo(() => (date ? getDailyQuote() : ""), [date]);
 
