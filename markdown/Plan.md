@@ -81,33 +81,33 @@
 - [x] History (renamed from Calendar, last tab): weekly strip with completion-% badges; monthly grid with completion % + muscle-group dots; Muscle Distribution Donut with Week/Month/All toggle
 
 ### M7 - Weather Page
-- [ ] Open-Meteo (free, no key), geolocation with fallback; replaces modal
-- [ ] Current conditions: temp, feels-like, high/low, sunrise/sunset, description
-- [ ] 8 detail cards: humidity, wind, visibility, UV, dew point, pressure, cloud cover, rain
-- [ ] Air quality: AQI badge, PM2.5, PM10, NO2, O3 with color-coded categories
-- [ ] 48h hourly horizontal scroll with weather icons
-- [ ] 7-day forecast with gradient temperature-range bars
-- [ ] Sun & moon section
+- [x] Open-Meteo (free, no key), geolocation with fallback; replaces modal
+- [x] Current conditions: temp, feels-like, high/low, sunrise/sunset, description
+- [x] 8 detail cards: humidity, wind, visibility, UV, dew point, pressure, cloud cover, rain
+- [x] Air quality: AQI badge, PM2.5, PM10, NO2, O3 with color-coded categories
+- [x] 48h hourly horizontal scroll with weather icons
+- [x] 7-day forecast with gradient temperature-range bars
+- [x] Sun & moon section
 
 ### M8 - Coaches & Sharing
-- [ ] Coaches section: 5 profiles (photos, ratings, experience, pricing, specialties)
-- [ ] Coach detail pages: hero photo, bio, focus tags, certifications, CTA (one primary CTA per page)
-- [ ] Share Workout: clean emoji-header card (no dividers) - completion %, exercises, sets, volume, muscles, per-exercise lines, app link; Web Share API + clipboard fallback + textarea fallback
+- [x] Coaches section: 5 profiles (photos, ratings, experience, pricing, specialties)
+- [x] Coach detail views: hero photo, bio, focus tags, certifications, CTA (one primary CTA per view)
+- [x] Share Workout: clean emoji-header card (no dividers) - completion %, exercises, sets, volume, muscles, per-exercise lines, app link; Web Share API + clipboard fallback + textarea fallback
 
 ### M9 - PWA, Splash, Branding, Footer & SEO
-- [ ] Splash screen: 2.5s B&W gym photo + Aero Gym logo, once per session (`sessionStorage`)
-- [ ] PWA: `manifest.json`, service worker, installable (cache-busted versioning)
-- [ ] Branding assets: favicon.ico, 16/32 png, apple-touch-icon, android-chrome 192/512, OG image (bold gold "AERO GYM" on aero-og background, feature pills, description)
-- [ ] Logo behavior: icon-only mobile / icon+text desktop sidebar; clicking logo = Home
-- [ ] SEO: metadata, `robots.ts`, `sitemap.ts`, `opengraph-image.tsx`, direct Google Search URLs
-- [ ] Legal pages with real content: Careers, Privacy Policy, Terms of Service, HTML sitemap; footer links wired to them
-- [ ] Footer: 5-column layout + logo + description; socials (X, IG, FB, TikTok, LinkedIn) in theme colors; dynamic copyright year
-- [ ] Back-to-top button: appears after 600px scroll, smooth scroll
+- [x] Splash screen: 2.5s B&W gym photo + Aero Gym logo, once per session (`sessionStorage`)
+- [x] PWA: `manifest.json`, service worker, installable (cache-busted versioning)
+- [x] Branding assets: favicon.ico, 16/32 png, apple-touch-icon, android-chrome 192/512, OG image (bold gold "AERO GYM" on aero-og background, feature pills, description)
+- [x] Logo behavior: icon-only mobile / icon+text desktop sidebar; clicking logo = Home
+- [x] SEO: metadata, `robots.ts`, `sitemap.ts`, static `aero-og.jpg` OG image, direct Google Search URLs
+- [x] Legal pages with real content: Careers, Privacy Policy, Terms of Service, HTML sitemap; footer links wired to them
+- [x] Footer: 5-column layout + logo + description; socials (X, IG, FB, TikTok, LinkedIn) in theme colors; dynamic copyright year
+- [ ] Back-to-top button: appears after 600px scroll, smooth scroll (works from page scroll; desktop inner-scroller check in the Playwright audit still fails)
 - [ ] WhatsApp floating button: official SVG icon on `#25D366`, tooltip above the button (blocked: needs phone number from user)
-- [ ] All images via `next/image` with proper `sizes`, `priority`, `loading`
-- [ ] Responsive hardening pass (375px+ mobile, 1024px+ desktop sidebar)
+- [x] All images via `next/image` with proper `sizes`, `priority`, `loading`
+- [x] Responsive hardening pass (375px+ mobile, 1024px+ desktop sidebar)
 
-### M10 - PRD Compliance Audit & Polish
+ - PRD Compliance Audit & Polish
 - [ ] Embedded Google Maps with functional location discovery in-page (blocked: needs API-key decision from user)
 - [ ] Line-by-line PRD §3-§6 checklist against the running app; fix gaps
 - [ ] localStorage key audit; export/import round-trip test
